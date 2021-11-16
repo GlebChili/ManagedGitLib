@@ -13,7 +13,11 @@ namespace Nerdbank.GitVersioning.ManagedGit
 {
     internal static class FileHelpers
     {
+#if NET6_0_OR_GREATER
+        private static readonly bool IsWindows = OperatingSystem.IsWindowsVersionAtLeast(5, 1, 2600);
+#else
         private static readonly bool IsWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+#endif
 
         /// <summary>
         /// Opens the file with a given path, if it exists.
