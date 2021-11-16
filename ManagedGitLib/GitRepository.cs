@@ -43,6 +43,11 @@ namespace Nerdbank.GitVersioning.ManagedGit
         /// </returns>
         public static GitRepository? Create(string? workingDirectory)
         {
+            // The following 3 local static methods (ReadGitDirFromFileб FindGitDir, TryFindGitPaths)
+            // are brought from GitContext class of the original Nerdbank.GitVersioning:
+            // https://github.com/dotnet/Nerdbank.GitVersioning/blob/3523340eae927840ba33cbcae8a8f313521e0b4b/src/NerdBank.GitVersioning/GitContext.cs
+            // We define it here in order not to take dependency on larger GitVersioning code base
+
             static string? ReadGitDirFromFile(string fileName)
             {
                 const string expectedPrefix = "gitdir: ";
