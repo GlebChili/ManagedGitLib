@@ -17,7 +17,7 @@ namespace ManagedGitLib.Tests
         {
             var indexFile = Path.GetTempFileName();
 
-            using (Stream resourceStream = TestUtilities.GetEmbeddedResource(@"ManagedGit\pack-7d6b2c56ffb97eedb92f4e28583c093f7ee4b3d9.idx"))
+            using (Stream resourceStream = TestUtilities.GetEmbeddedResource(@"pack-7d6b2c56ffb97eedb92f4e28583c093f7ee4b3d9.idx"))
             using (FileStream stream = File.Open(indexFile, FileMode.Open))
             {
                 resourceStream.CopyTo(stream);
@@ -50,7 +50,7 @@ namespace ManagedGitLib.Tests
         {
             var indexFile = Path.GetTempFileName();
 
-            using (Stream resourceStream = TestUtilities.GetEmbeddedResource(@"ManagedGit\pack-7d6b2c56ffb97eedb92f4e28583c093f7ee4b3d9.idx"))
+            using (Stream resourceStream = TestUtilities.GetEmbeddedResource(@"pack-7d6b2c56ffb97eedb92f4e28583c093f7ee4b3d9.idx"))
             using (FileStream stream = File.Open(indexFile, FileMode.Open))
             {
                 resourceStream.CopyTo(stream);

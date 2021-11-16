@@ -44,7 +44,7 @@ internal static class TestUtilities
     {
         Requires.NotNullOrEmpty(resourcePath, nameof(resourcePath));
 
-        return Assembly.GetExecutingAssembly().GetManifestResourceStream($"{ThisAssembly.RootNamespace}.{resourcePath.Replace('\\', '.')}");
+        return Assembly.GetExecutingAssembly().GetManifestResourceStream($"ManagedGitLib.Tests.{resourcePath.Replace('\\', '.')}");
     }
 
     internal static void ExtractEmbeddedResource(string resourcePath, string extractedFilePath)

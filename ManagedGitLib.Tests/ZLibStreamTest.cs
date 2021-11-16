@@ -12,7 +12,7 @@ namespace ManagedGitLib.Tests
         [Fact]
         public void ReadTest()
         {
-            using (Stream rawStream = TestUtilities.GetEmbeddedResource(@"ManagedGit\3596ffe59898103a2675547d4597e742e1f2389c.gz"))
+            using (Stream rawStream = TestUtilities.GetEmbeddedResource(@"3596ffe59898103a2675547d4597e742e1f2389c.gz"))
             using (ZLibStream stream = new ZLibStream(rawStream, -1))
             using (var sha = SHA1.Create())
             {
@@ -30,7 +30,7 @@ namespace ManagedGitLib.Tests
         [Fact]
         public void SeekTest()
         {
-            using (Stream rawStream = TestUtilities.GetEmbeddedResource(@"ManagedGit\3596ffe59898103a2675547d4597e742e1f2389c.gz"))
+            using (Stream rawStream = TestUtilities.GetEmbeddedResource(@"3596ffe59898103a2675547d4597e742e1f2389c.gz"))
             using (ZLibStream stream = new ZLibStream(rawStream, -1))
             {
                 // Seek past the commit 137 header, and make sure we can read the 'tree' word

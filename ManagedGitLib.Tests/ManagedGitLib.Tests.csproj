@@ -25,4 +25,11 @@
     <ProjectReference Include="../ManagedGitLib/ManagedGitLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="*.gz" />
+    <EmbeddedResource Include="commit*" />
+    <EmbeddedResource Include="pack*" />
+    <EmbeddedResource Include="tree*" />
+  </ItemGroup>
+
 </Project>

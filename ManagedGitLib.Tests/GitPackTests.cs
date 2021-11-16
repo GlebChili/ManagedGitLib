@@ -13,13 +13,13 @@ namespace ManagedGitLib.Tests
 
         public GitPackTests()
         {
-            using (Stream resourceStream = TestUtilities.GetEmbeddedResource(@"ManagedGit\pack-7d6b2c56ffb97eedb92f4e28583c093f7ee4b3d9.idx"))
+            using (Stream resourceStream = TestUtilities.GetEmbeddedResource(@"pack-7d6b2c56ffb97eedb92f4e28583c093f7ee4b3d9.idx"))
             using (FileStream stream = File.Open(this.indexFile, FileMode.Open))
             {
                 resourceStream.CopyTo(stream);
             }
 
-            using (Stream resourceStream = TestUtilities.GetEmbeddedResource(@"ManagedGit\pack-7d6b2c56ffb97eedb92f4e28583c093f7ee4b3d9.pack"))
+            using (Stream resourceStream = TestUtilities.GetEmbeddedResource(@"pack-7d6b2c56ffb97eedb92f4e28583c093f7ee4b3d9.pack"))
             using (FileStream stream = File.Open(this.packFile, FileMode.Open))
             {
                 resourceStream.CopyTo(stream);

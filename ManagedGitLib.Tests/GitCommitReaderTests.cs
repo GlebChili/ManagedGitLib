@@ -9,7 +9,7 @@ namespace ManagedGitLib.Tests
         [Fact]
         public void ReadTest()
         {
-            using (Stream stream = TestUtilities.GetEmbeddedResource(@"ManagedGit\commit-d56dc3ed179053abef2097d1120b4507769bcf1a"))
+            using (Stream stream = TestUtilities.GetEmbeddedResource(@"commit-d56dc3ed179053abef2097d1120b4507769bcf1a"))
             {
                 var commit = GitCommitReader.Read(stream, GitObjectId.Parse("d56dc3ed179053abef2097d1120b4507769bcf1a"), readAuthor: true);
 
