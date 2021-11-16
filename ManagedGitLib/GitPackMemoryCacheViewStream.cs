@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace Nerdbank.GitVersioning.ManagedGit
+namespace ManagedGitLib
 {
     internal class GitPackMemoryCacheViewStream : Stream
     {

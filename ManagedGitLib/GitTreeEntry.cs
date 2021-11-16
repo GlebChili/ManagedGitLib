@@ -1,6 +1,6 @@
 ﻿#nullable enable
 
-namespace Nerdbank.GitVersioning.ManagedGit
+namespace ManagedGitLib
 {
     /// <summary>
     /// Represents an individual entry in the Git tree.

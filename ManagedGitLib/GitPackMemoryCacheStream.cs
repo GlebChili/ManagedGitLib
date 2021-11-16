@@ -4,7 +4,7 @@ using System;
 using System.Buffers;
 using System.IO;
 
-namespace Nerdbank.GitVersioning.ManagedGit
+namespace ManagedGitLib
 {
     internal class GitPackMemoryCacheStream : Stream
     {

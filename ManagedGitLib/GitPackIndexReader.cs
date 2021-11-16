@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Nerdbank.GitVersioning.ManagedGit
+namespace ManagedGitLib
 {
     /// <summary>
     /// Base class for classes which support reading data stored in a Git Pack file.

@@ -8,7 +8,7 @@ using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Nerdbank.GitVersioning.ManagedGit
+namespace ManagedGitLib
 {
     /// <summary>
     /// A <see cref="Stream"/> which reads zlib-compressed data.

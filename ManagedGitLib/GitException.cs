@@ -3,7 +3,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Nerdbank.GitVersioning
+namespace ManagedGitLib
 {
     /// <summary>
     /// The exception which is thrown by the managed Git layer.

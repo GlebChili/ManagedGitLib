@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 
-namespace Nerdbank.GitVersioning.ManagedGit
+namespace ManagedGitLib
 {
     /// <summary>
     /// A <see cref="Stream"/> which reads data stored in the Git object store. The data is stored

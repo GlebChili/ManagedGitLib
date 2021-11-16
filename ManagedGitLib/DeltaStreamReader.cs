@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 
-namespace Nerdbank.GitVersioning.ManagedGit
+namespace ManagedGitLib
 {
     /// <summary>
     /// Reads delta instructions from a <see cref="Stream"/>.

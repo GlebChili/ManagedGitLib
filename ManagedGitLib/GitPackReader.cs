@@ -5,7 +5,7 @@ using System.Buffers.Binary;
 using System.Diagnostics;
 using System.IO;
 
-namespace Nerdbank.GitVersioning.ManagedGit
+namespace ManagedGitLib
 {
     internal static class GitPackReader
     {

@@ -9,7 +9,7 @@ using Windows.Win32;
 using Windows.Win32.Storage.FileSystem;
 using Windows.Win32.Foundation;
 
-namespace Nerdbank.GitVersioning.ManagedGit
+namespace ManagedGitLib
 {
     internal static class FileHelpers
     {

@@ -4,7 +4,7 @@ using System;
 using System.Buffers;
 using System.IO;
 
-namespace Nerdbank.GitVersioning.ManagedGit
+namespace ManagedGitLib
 {
     /// <summary>
     /// Provides extension methods for the <see cref="Stream"/> class.

@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 
-namespace Nerdbank.GitVersioning.ManagedGit
+namespace ManagedGitLib
 {
     /// <summary>
     /// A <see cref="GitPackIndexReader"/> which uses a memory-mapped file to read from the index.

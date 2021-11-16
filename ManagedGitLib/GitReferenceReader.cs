@@ -3,7 +3,7 @@
 using System;
 using System.IO;
 
-namespace Nerdbank.GitVersioning.ManagedGit
+namespace ManagedGitLib
 {
     internal class GitReferenceReader
     {

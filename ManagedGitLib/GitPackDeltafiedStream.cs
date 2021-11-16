@@ -5,7 +5,7 @@ using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 
-namespace Nerdbank.GitVersioning.ManagedGit
+namespace ManagedGitLib
 {
     /// <summary>
     /// Reads data from a deltafied object.

@@ -9,9 +9,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Validation;
-using Nerdbank.GitVersioning;
 
-namespace Nerdbank.GitVersioning.ManagedGit
+namespace ManagedGitLib
 {
     /// <summary>
     /// Provides access to a Git repository.
