@@ -1,8 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -18,6 +17,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Xunit.Combinatorial" Version="1.2.7" />
+    <PackageReference Include="LibGit2Sharp" Version="0.27.0-preview-0158" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../ManagedGitLib/ManagedGitLib.csproj" />
   </ItemGroup>
 
 </Project>
