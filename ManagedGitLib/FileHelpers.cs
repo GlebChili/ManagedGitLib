@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 using Windows.Win32;
 using Windows.Win32.Storage.FileSystem;
-using Windows.Win32.System.SystemServices;
+using Windows.Win32.Foundation;
 
 namespace Nerdbank.GitVersioning.ManagedGit
 {
@@ -69,7 +69,7 @@ namespace Nerdbank.GitVersioning.ManagedGit
                     handle = PInvoke.CreateFile(pPath, FILE_ACCESS_FLAGS.FILE_GENERIC_READ, FILE_SHARE_MODE.FILE_SHARE_READ, null, FILE_CREATION_DISPOSITION.OPEN_EXISTING, FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_NORMAL, default);
                 }
 
-                if (!handle.Equals(Constants.INVALID_HANDLE_VALUE))
+                if (!handle.Equals(PInvoke.INVALID_HANDLE_VALUE))
                 {
                     var fileHandle = new SafeFileHandle(handle, ownsHandle: true);
                     stream = new FileStream(fileHandle, System.IO.FileAccess.Read);

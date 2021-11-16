@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Validation;
+using Nerdbank.GitVersioning;
 
 namespace Nerdbank.GitVersioning.ManagedGit
 {
@@ -42,7 +43,74 @@ namespace Nerdbank.GitVersioning.ManagedGit
         /// </returns>
         public static GitRepository? Create(string? workingDirectory)
         {
-            if (!GitContext.TryFindGitPaths(workingDirectory, out string? gitDirectory, out string? workingTreeDirectory, out string? workingTreeRelativePath))
+            static string? ReadGitDirFromFile(string fileName)
+            {
+                const string expectedPrefix = "gitdir: ";
+                var firstLineOfFile = File.ReadLines(fileName).FirstOrDefault();
+                if (firstLineOfFile?.StartsWith(expectedPrefix) ?? false)
+                {
+                    return firstLineOfFile.Substring(expectedPrefix.Length); // strip off the prefix, leaving just the path
+                }
+
+                return null;
+            }
+
+            static (string GitDirectory, string WorkingTreeDirectory)? FindGitDir(string path)
+            {
+                string? startingDir = path;
+                while (startingDir is object)
+                {
+                    var dirOrFilePath = Path.Combine(startingDir, ".git");
+                    if (Directory.Exists(dirOrFilePath))
+                    {
+                        return (dirOrFilePath, Path.GetDirectoryName(dirOrFilePath)!);
+                    }
+                    else if (File.Exists(dirOrFilePath))
+                    {
+                        string? relativeGitDirPath = ReadGitDirFromFile(dirOrFilePath);
+                        if (!string.IsNullOrWhiteSpace(relativeGitDirPath))
+                        {
+                            var fullGitDirPath = Path.GetFullPath(Path.Combine(startingDir, relativeGitDirPath));
+                            if (Directory.Exists(fullGitDirPath))
+                            {
+                                return (fullGitDirPath, Path.GetDirectoryName(dirOrFilePath)!);
+                            }
+                        }
+                    }
+
+                    startingDir = Path.GetDirectoryName(startingDir);
+                }
+
+                return null;
+            }
+
+            static bool TryFindGitPaths(string? path, [NotNullWhen(true)] out string? gitDirectory, [NotNullWhen(true)] out string? workingTreeDirectory, [NotNullWhen(true)] out string? workingTreeRelativePath)
+            {
+                if (path is null || path.Length == 0)
+                {
+                    gitDirectory = null;
+                    workingTreeDirectory = null;
+                    workingTreeRelativePath = null;
+                    return false;
+                }
+
+                path = Path.GetFullPath(path);
+                var gitDirs = FindGitDir(path);
+                if (gitDirs is null)
+                {
+                    gitDirectory = null;
+                    workingTreeDirectory = null;
+                    workingTreeRelativePath = null;
+                    return false;
+                }
+
+                gitDirectory = gitDirs.Value.GitDirectory;
+                workingTreeDirectory = gitDirs.Value.WorkingTreeDirectory;
+                workingTreeRelativePath = path.Substring(gitDirs.Value.WorkingTreeDirectory.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                return true;
+            }
+
+            if (!TryFindGitPaths(workingDirectory, out string? gitDirectory, out string? workingTreeDirectory, out string? workingTreeRelativePath))
             {
                 return null;
             }
