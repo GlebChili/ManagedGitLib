@@ -12,15 +12,45 @@ namespace ManagedGitLib.Tests
     {
         DirectoryInfo notARepo;
 
+        DirectoryInfo repoWithOneFile;
+        Signature repoWithOneFileSignature;
+        DateTimeOffset repoWithOneFileTime;
+
         public GitRepositoryTests()
         {
             notARepo = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
             File.WriteAllText(Path.Combine(notARepo.FullName, "file.txt"), Guid.NewGuid().ToString());
+
+            repoWithOneFile = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+            File.WriteAllText(Path.Combine(notARepo.FullName, "file.txt"), Guid.NewGuid().ToString());
+            Repository.Init(repoWithOneFile.FullName);
+            using Repository repoWithOneFileGit = new Repository(repoWithOneFile.FullName);
+            repoWithOneFileTime = DateTimeOffset.Now;
+            repoWithOneFileSignature = new Signature("TestRunner", "tests@tests.com", repoWithOneFileTime);
+            Commands.Stage(repoWithOneFileGit, "*");
+            repoWithOneFileGit.Commit("First commit", repoWithOneFileSignature, repoWithOneFileSignature);
+            repoWithOneFileTime = repoWithOneFileGit.Head.Tip.Author.When;
         }
 
         public void Dispose()
         {
             notARepo.Delete(true);
+
+            SetFilesAttributesToNormal(repoWithOneFile);
+            repoWithOneFile.Delete(true);
+
+            static void SetFilesAttributesToNormal(DirectoryInfo directory)
+            {
+                foreach (FileInfo file in directory.GetFiles())
+                {
+                    File.SetAttributes(file.FullName, FileAttributes.Normal);
+                }
+
+                foreach (DirectoryInfo subdirectory in directory.GetDirectories())
+                {
+                    SetFilesAttributesToNormal(subdirectory);
+                }
+            }
         }
 
         [Fact]
@@ -32,6 +62,30 @@ namespace ManagedGitLib.Tests
             Assert.True(notARepo.Exists);
             Assert.True(notARepo.GetFiles().Length > 0);
             Assert.Null(GitRepository.Create(notARepo.FullName));
+        }
+
+        [Fact]
+        public void OpenRepoWithFile()
+        {
+            GitRepository managedRepo = GitRepository.Create(repoWithOneFile.FullName);
+            
+            Assert.NotNull(managedRepo);
+
+            var commit = managedRepo.GetHeadCommit(true);
+
+            Assert.NotNull(commit);
+
+            var commitSignature = commit.Value.Author;
+
+            Assert.NotNull(commitSignature);
+
+            Assert.Equal("TestRunner", commitSignature.Value.Name);
+
+            Assert.Equal("tests@tests.com", commitSignature.Value.Email);
+
+            Assert.Equal<DateTimeOffset>(repoWithOneFileTime, commitSignature.Value.Date);
+
+            Assert.Empty(commit.Value.Parents.ToList());
         }
 
         [Fact]
