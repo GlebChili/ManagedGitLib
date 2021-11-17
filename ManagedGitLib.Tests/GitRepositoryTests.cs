@@ -8,14 +8,30 @@ using Xunit.Abstractions;
 
 namespace ManagedGitLib.Tests
 {
-    public class GitRepositoryTests
+    public class GitRepositoryTests : IDisposable
     {
+        DirectoryInfo notARepo;
+
+        public GitRepositoryTests()
+        {
+            notARepo = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+            File.WriteAllText(Path.Combine(notARepo.FullName, "file.txt"), Guid.NewGuid().ToString());
+        }
+
+        public void Dispose()
+        {
+            notARepo.Delete(true);
+        }
+
         [Fact]
         public void CreateNotARepoTest()
         {
             Assert.Null(GitRepository.Create(null));
             Assert.Null(GitRepository.Create(""));
             Assert.Null(GitRepository.Create("/A/Path/To/A/Directory/Which/Does/Not/Exist"));
+            Assert.True(notARepo.Exists);
+            Assert.True(notARepo.GetFiles().Length > 0);
+            Assert.Null(GitRepository.Create(notARepo.FullName));
         }
 
         [Fact]
