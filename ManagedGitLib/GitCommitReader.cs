@@ -18,6 +18,8 @@ namespace ManagedGitLib
         private static readonly byte[] ParentStart = GitRepository.Encoding.GetBytes("parent ");
         private static readonly byte[] AuthorStart = GitRepository.Encoding.GetBytes("author ");
         private static readonly byte[] CommitterStart = GitRepository.Encoding.GetBytes("committer ");
+        private static readonly byte[] GpgsigStart = GitRepository.Encoding.GetBytes("gpgsig ");
+        private static readonly byte[] MessageStart = GitRepository.Encoding.GetBytes("\n");
 
         private const int TreeLineLength = 46;
         private const int ParentLineLength = 48;
@@ -116,6 +118,20 @@ namespace ManagedGitLib
 
             buffer = buffer.Slice(committerLineLength);
 
+            byte[]? gpgSignature = null;
+
+            if (TryReadGpgsig(buffer, out gpgSignature, out int gpgSignatureLength))
+            {
+                buffer = buffer.Slice(gpgSignatureLength);
+            }
+
+            string message = "";
+
+            if (!TryReadMessage(buffer, out message))
+            {
+                throw new GitException("Unable to read commit message");
+            }
+
             return new GitCommit()
             {
                 Sha = sha,
@@ -124,7 +140,9 @@ namespace ManagedGitLib
                 AdditionalParents = additionalParents,
                 Tree = tree,
                 Author = authorSignature,
-                Committer = commiterSignature
+                Committer = commiterSignature,
+                GpgSignature = gpgSignature,
+                Message = message
             };
         }
 
@@ -221,6 +239,42 @@ namespace ManagedGitLib
             var offsetStart = time.IndexOf((byte)' ');
             var ticks = long.Parse(GitRepository.GetString(time.Slice(0, offsetStart)));
             signature.Date = DateTimeOffset.FromUnixTimeSeconds(ticks);
+
+            return true;
+        }
+
+        private static bool TryReadGpgsig(ReadOnlySpan<byte> buffer, out byte[]? gpgSignature, out int gpgsigLength)
+        {
+            gpgSignature = null;
+            gpgsigLength = 0;
+
+            if (!buffer.Slice(0, GpgsigStart.Length).SequenceEqual(GpgsigStart))
+            {
+                return false;
+            }
+
+            buffer = buffer.Slice(GpgsigStart.Length);
+
+            int indexOfDoubleLineEnd = buffer.IndexOf(GitRepository.Encoding.GetBytes("\n\n"));
+
+            gpgsigLength = GpgsigStart.Length + indexOfDoubleLineEnd + 1;
+            gpgSignature = buffer.Slice(0, indexOfDoubleLineEnd).ToArray();
+
+            return true;
+        }
+
+        private static bool TryReadMessage(ReadOnlySpan<byte> buffer, out string message)
+        {
+            message = "";
+
+            if (!buffer.Slice(0, MessageStart.Length).SequenceEqual(MessageStart))
+            {
+                return false;
+            }
+
+            buffer = buffer.Slice(MessageStart.Length);
+
+            message = GitRepository.Encoding.GetString(buffer.ToArray()).Trim(new char ['\n']);
 
             return true;
         }
