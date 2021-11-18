@@ -7,7 +7,7 @@ namespace ManagedGitLib.Tests
     public class GitCommitReaderTests
     {
         [Fact]
-        public void ReadTest()
+        public void ReadNoGpgSignatureTest()
         {
             using (Stream stream = TestUtilities.GetEmbeddedResource(@"commit-d56dc3ed179053abef2097d1120b4507769bcf1a"))
             {
@@ -27,7 +27,15 @@ namespace ManagedGitLib.Tests
                 Assert.Equal(new DateTimeOffset(2020, 10, 6, 13, 40, 09, TimeSpan.FromHours(-6)), author.Date);
                 Assert.Equal("andrewarnott@gmail.com", author.Email);
 
-                // Committer and commit message are not read
+                var committer = commit.Committer;
+
+                Assert.Equal("Andrew Arnott", committer.Name);
+                Assert.Equal(new DateTimeOffset(2020, 10, 6, 13, 40, 09, TimeSpan.FromHours(-6)), author.Date);
+                Assert.Equal("andrewarnott@gmail.com", committer.Email);
+
+                Assert.Equal("Merge branch 'v3.3'", commit.Message);
+
+                Assert.Null(commit.GpgSignature);
             }
         }
     }

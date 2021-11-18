@@ -274,7 +274,7 @@ namespace ManagedGitLib
 
             buffer = buffer.Slice(MessageStart.Length);
 
-            message = GitRepository.Encoding.GetString(buffer.ToArray()).Trim(new char ['\n']);
+            message = GitRepository.Encoding.GetString(buffer.ToArray()).TrimEnd('\n');
 
             return true;
         }
