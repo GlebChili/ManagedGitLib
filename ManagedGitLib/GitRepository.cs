@@ -307,7 +307,7 @@ namespace ManagedGitLib
         /// <returns>
         /// The current HEAD commit, or <see langword="null"/> if not available.
         /// </returns>
-        public GitCommit? GetHeadCommit(bool readAuthor = false)
+        public GitCommit? GetHeadCommit()
         {
             var headCommitId = this.GetHeadCommitSha();
 
@@ -316,7 +316,7 @@ namespace ManagedGitLib
                 return null;
             }
 
-            return this.GetCommit(headCommitId, readAuthor);
+            return this.GetCommit(headCommitId);
         }
 
         /// <summary>
@@ -331,7 +331,7 @@ namespace ManagedGitLib
         /// <returns>
         /// The requested commit.
         /// </returns>
-        public GitCommit GetCommit(GitObjectId sha, bool readAuthor = false)
+        public GitCommit GetCommit(GitObjectId sha)
         {
             using (Stream? stream = this.GetObjectBySha(sha, "commit"))
             {
@@ -340,7 +340,7 @@ namespace ManagedGitLib
                     throw new GitException($"The commit {sha} was not found in this repository.") { ErrorCode = GitException.ErrorCodes.ObjectNotFound };
                 }
 
-                return GitCommitReader.Read(stream, sha, readAuthor);
+                return GitCommitReader.Read(stream, sha);
             }
         }
 

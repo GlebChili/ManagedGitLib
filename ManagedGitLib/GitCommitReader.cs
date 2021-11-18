@@ -36,7 +36,7 @@ namespace ManagedGitLib
         /// <returns>
         /// The <see cref="GitCommit"/>.
         /// </returns>
-        public static GitCommit Read(Stream stream, GitObjectId sha, bool readAuthor = false)
+        public static GitCommit Read(Stream stream, GitObjectId sha)
         {
             if (stream is null)
             {
@@ -50,7 +50,7 @@ namespace ManagedGitLib
                 Span<byte> span = buffer.AsSpan(0, (int)stream.Length);
                 stream.ReadAll(span);
 
-                return Read(span, sha, readAuthor);
+                return Read(span, sha);
             }
             finally
             {
@@ -73,7 +73,7 @@ namespace ManagedGitLib
         /// <returns>
         /// The <see cref="GitCommit"/>.
         /// </returns>
-        public static GitCommit Read(ReadOnlySpan<byte> commit, GitObjectId sha, bool readAuthor = false)
+        public static GitCommit Read(ReadOnlySpan<byte> commit, GitObjectId sha)
         {
             var buffer = commit;
 
@@ -105,7 +105,7 @@ namespace ManagedGitLib
 
             GitSignature signature = default;
 
-            if (readAuthor && !TryReadAuthor(buffer, out signature))
+            if (!TryReadAuthor(buffer, out signature))
             {
                 throw new GitException();
             }
@@ -117,7 +117,7 @@ namespace ManagedGitLib
                 SecondParent = secondParent,
                 AdditionalParents = additionalParents,
                 Tree = tree,
-                Author = readAuthor ? signature : (GitSignature?)null,
+                Author = signature,
             };
         }
 
