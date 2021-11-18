@@ -1,21 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.31911.260
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedGitLib", "ManagedGitLib\ManagedGitLib.csproj", "{664877E7-1DD2-4823-843C-3DC5CE8A803D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManagedGitLib", "ManagedGitLib\ManagedGitLib.csproj", "{664877E7-1DD2-4823-843C-3DC5CE8A803D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedGitLib.Tests", "ManagedGitLib.Tests\ManagedGitLib.Tests.csproj", "{A9FD29FF-594D-4C7D-8351-FCCEE12904A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ManagedGitLib.Tests", "ManagedGitLib.Tests\ManagedGitLib.Tests.csproj", "{A9FD29FF-594D-4C7D-8351-FCCEE12904A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NerdBank.GitVersioning", "NerdBank.GitVersioning\NerdBank.GitVersioning.csproj", "{7011673D-CB14-4584-88EA-236667AA4AD6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NerdBank.GitVersioning", "NerdBank.GitVersioning\NerdBank.GitVersioning.csproj", "{7011673D-CB14-4584-88EA-236667AA4AD6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedGitLib.ExtendedTests", "ManagedGitLib.ExtendedTests\ManagedGitLib.ExtendedTests.csproj", "{72AC2D60-43F6-4B71-BCD0-5E40A72C805C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{664877E7-1DD2-4823-843C-3DC5CE8A803D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -30,5 +29,15 @@ Global
 		{7011673D-CB14-4584-88EA-236667AA4AD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7011673D-CB14-4584-88EA-236667AA4AD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7011673D-CB14-4584-88EA-236667AA4AD6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72AC2D60-43F6-4B71-BCD0-5E40A72C805C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72AC2D60-43F6-4B71-BCD0-5E40A72C805C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72AC2D60-43F6-4B71-BCD0-5E40A72C805C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72AC2D60-43F6-4B71-BCD0-5E40A72C805C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {08987C74-E59D-4053-BE08-9649758DF868}
 	EndGlobalSection
 EndGlobal
