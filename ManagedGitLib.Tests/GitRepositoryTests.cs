@@ -8,48 +8,47 @@ using Xunit.Abstractions;
 
 namespace ManagedGitLib.Tests
 {
-    public class GitRepositoryTests : IDisposable
+    public class GitRepositoryTests : RepoTestBase
     {
-        DirectoryInfo notARepo;
-
-        DirectoryInfo repoWithOneFile;
-        Signature repoWithOneFileSignature;
-        DateTimeOffset repoWithOneFileTime;
-
-        public GitRepositoryTests()
+        public GitRepositoryTests(ITestOutputHelper logger)
+            : base(logger)
         {
-            notARepo = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
-            File.WriteAllText(Path.Combine(notARepo.FullName, "file.txt"), Guid.NewGuid().ToString());
-
-            repoWithOneFile = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
-            File.WriteAllText(Path.Combine(notARepo.FullName, "file.txt"), Guid.NewGuid().ToString());
-            Repository.Init(repoWithOneFile.FullName);
-            using Repository repoWithOneFileGit = new Repository(repoWithOneFile.FullName);
-            repoWithOneFileTime = DateTimeOffset.Now;
-            repoWithOneFileSignature = new Signature("TestRunner", "tests@tests.com", repoWithOneFileTime);
-            Commands.Stage(repoWithOneFileGit, "*");
-            repoWithOneFileGit.Commit("First commit", repoWithOneFileSignature, repoWithOneFileSignature);
-            repoWithOneFileTime = repoWithOneFileGit.Head.Tip.Author.When;
         }
 
-        public void Dispose()
+        protected override Nerdbank.GitVersioning.GitContext CreateGitContext(string path, string committish = null)
+            => Nerdbank.GitVersioning.GitContext.Create(path, committish, writable: false);
+
+        [Fact]
+        public void CreateTest()
         {
-            notARepo.Delete(true);
+            this.InitializeSourceControl();
+            this.AddCommits(1);
 
-            SetFilesAttributesToNormal(repoWithOneFile);
-            repoWithOneFile.Delete(true);
-
-            static void SetFilesAttributesToNormal(DirectoryInfo directory)
+            using (var repository = GitRepository.Create(this.RepoPath))
             {
-                foreach (FileInfo file in directory.GetFiles())
-                {
-                    File.SetAttributes(file.FullName, FileAttributes.Normal);
-                }
+                AssertPath(Path.Combine(this.RepoPath, ".git"), repository.CommonDirectory);
+                AssertPath(Path.Combine(this.RepoPath, ".git"), repository.GitDirectory);
+                AssertPath(this.RepoPath, repository.WorkingDirectory);
+                AssertPath(Path.Combine(this.RepoPath, ".git", "objects"), repository.ObjectDirectory);
+            }
+        }
 
-                foreach (DirectoryInfo subdirectory in directory.GetDirectories())
-                {
-                    SetFilesAttributesToNormal(subdirectory);
-                }
+        [Fact]
+        public void CreateWorkTreeTest()
+        {
+            this.InitializeSourceControl();
+            this.AddCommits(2);
+
+            string workTreePath = this.CreateDirectoryForNewRepo();
+            Directory.Delete(workTreePath);
+            this.LibGit2Repository.Worktrees.Add("HEAD~1", "myworktree", workTreePath, isLocked: false);
+
+            using (var repository = GitRepository.Create(workTreePath))
+            {
+                AssertPath(Path.Combine(this.RepoPath, ".git"), repository.CommonDirectory);
+                AssertPath(Path.Combine(this.RepoPath, ".git", "worktrees", "myworktree"), repository.GitDirectory);
+                AssertPath(workTreePath, repository.WorkingDirectory);
+                AssertPath(Path.Combine(this.RepoPath, ".git", "objects"), repository.ObjectDirectory);
             }
         }
 
@@ -59,33 +58,230 @@ namespace ManagedGitLib.Tests
             Assert.Null(GitRepository.Create(null));
             Assert.Null(GitRepository.Create(""));
             Assert.Null(GitRepository.Create("/A/Path/To/A/Directory/Which/Does/Not/Exist"));
-            Assert.True(notARepo.Exists);
-            Assert.True(notARepo.GetFiles().Length > 0);
-            Assert.Null(GitRepository.Create(notARepo.FullName));
+            Assert.Null(GitRepository.Create(this.RepoPath));
+        }
+
+        // A "normal" repository, where a branch is currently checked out.
+        [Fact]
+        public void GetHeadAsReferenceTest()
+        {
+            this.InitializeSourceControl();
+            this.AddCommits(2);
+
+            var headObjectId = GitObjectId.Parse(this.LibGit2Repository.Head.Tip.Sha);
+
+            using (var repository = GitRepository.Create(this.RepoPath))
+            {
+                var head = repository.GetHeadAsReferenceOrSha();
+                var reference = Assert.IsType<string>(head);
+                Assert.Equal("refs/heads/main", reference);
+
+                Assert.Equal(headObjectId, repository.GetHeadCommitSha());
+
+                var headCommit = repository.GetHeadCommit();
+                Assert.NotNull(headCommit);
+                Assert.Equal(headObjectId, headCommit.Value.Sha);
+            }
+        }
+
+        // A repository with a detached HEAD.
+        [Fact]
+        public void GetHeadAsShaTest()
+        {
+            this.InitializeSourceControl();
+            this.AddCommits(2);
+
+            var newHead = this.LibGit2Repository.Head.Tip.Parents.Single();
+            var newHeadObjectId = GitObjectId.Parse(newHead.Sha);
+            Commands.Checkout(this.LibGit2Repository, this.LibGit2Repository.Head.Tip.Parents.Single());
+
+            using (var repository = GitRepository.Create(this.RepoPath))
+            {
+                var detachedHead = repository.GetHeadAsReferenceOrSha();
+                var reference = Assert.IsType<GitObjectId>(detachedHead);
+                Assert.Equal(newHeadObjectId, reference);
+
+                Assert.Equal(newHeadObjectId, repository.GetHeadCommitSha());
+
+                var headCommit = repository.GetHeadCommit();
+                Assert.NotNull(headCommit);
+                Assert.Equal(newHeadObjectId, headCommit.Value.Sha);
+            }
+        }
+
+        // A fresh repository with no commits yet.
+        [Fact]
+        public void GetHeadMissingTest()
+        {
+            this.InitializeSourceControl(withInitialCommit: false);
+
+            using (var repository = GitRepository.Create(this.RepoPath))
+            {
+                var head = repository.GetHeadAsReferenceOrSha();
+                var reference = Assert.IsType<string>(head);
+                Assert.Equal("refs/heads/main", reference);
+
+                Assert.Equal(GitObjectId.Empty, repository.GetHeadCommitSha());
+
+                Assert.Null(repository.GetHeadCommit());
+            }
+        }
+
+        // Fetch a commit from the object store
+        [Fact]
+        public void GetCommitTest()
+        {
+            this.InitializeSourceControl();
+            this.AddCommits(2);
+
+            var headObjectId = GitObjectId.Parse(this.LibGit2Repository.Head.Tip.Sha);
+
+            using (var repository = GitRepository.Create(this.RepoPath))
+            {
+                var commit = repository.GetCommit(headObjectId);
+                Assert.Equal(headObjectId, commit.Sha);
+            }
         }
 
         [Fact]
-        public void OpenRepoWithFile()
+        public void GetInvalidCommitTest()
         {
-            GitRepository managedRepo = GitRepository.Create(repoWithOneFile.FullName);
-            
-            Assert.NotNull(managedRepo);
+            this.InitializeSourceControl();
+            this.AddCommits(2);
 
-            var commit = managedRepo.GetHeadCommit(true);
+            var headObjectId = GitObjectId.Parse(this.LibGit2Repository.Head.Tip.Sha);
 
-            Assert.NotNull(commit);
+            using (var repository = GitRepository.Create(this.RepoPath))
+            {
+                Assert.Throws<GitException>(() => repository.GetCommit(GitObjectId.Empty));
+            }
+        }
 
-            var commitSignature = commit.Value.Author;
+        [Fact]
+        public void GetTreeEntryTest()
+        {
+            this.InitializeSourceControl();
+            File.WriteAllText(Path.Combine(this.RepoPath, "hello.txt"), "Hello, World");
+            Commands.Stage(this.LibGit2Repository, "hello.txt");
+            this.AddCommits();
 
-            Assert.NotNull(commitSignature);
+            using (var repository = GitRepository.Create(this.RepoPath))
+            {
+                var headCommit = repository.GetHeadCommit();
+                Assert.NotNull(headCommit);
 
-            Assert.Equal("TestRunner", commitSignature.Value.Name);
+                var helloBlobId = repository.GetTreeEntry(headCommit.Value.Tree, Encoding.UTF8.GetBytes("hello.txt"));
+                Assert.Equal("1856e9be02756984c385482a07e42f42efd5d2f3", helloBlobId.ToString());
+            }
+        }
 
-            Assert.Equal("tests@tests.com", commitSignature.Value.Email);
+        [Fact]
+        public void GetInvalidTreeEntryTest()
+        {
+            this.InitializeSourceControl();
+            File.WriteAllText(Path.Combine(this.RepoPath, "hello.txt"), "Hello, World");
+            Commands.Stage(this.LibGit2Repository, "hello.txt");
+            this.AddCommits();
 
-            Assert.Equal<DateTimeOffset>(repoWithOneFileTime, commitSignature.Value.Date);
+            using (var repository = GitRepository.Create(this.RepoPath))
+            {
+                var headCommit = repository.GetHeadCommit();
+                Assert.NotNull(headCommit);
 
-            Assert.Empty(commit.Value.Parents.ToList());
+                Assert.Equal(GitObjectId.Empty, repository.GetTreeEntry(headCommit.Value.Tree, Encoding.UTF8.GetBytes("goodbye.txt")));
+            }
+        }
+
+        [Fact]
+        public void GetObjectByShaTest()
+        {
+            this.InitializeSourceControl();
+            this.AddCommits(2);
+
+            var headObjectId = GitObjectId.Parse(this.LibGit2Repository.Head.Tip.Sha);
+
+            using (var repository = GitRepository.Create(this.RepoPath))
+            {
+                var commitStream = repository.GetObjectBySha(headObjectId, "commit");
+                Assert.NotNull(commitStream);
+
+                var objectStream = Assert.IsType<GitObjectStream>(commitStream);
+                Assert.Equal("commit", objectStream.ObjectType);
+                Assert.Equal(186, objectStream.Length);
+            }
+        }
+
+        // This test runs on netcoreapp only; netstandard/netfx don't support Path.GetRelativePath
+#if NETCOREAPP
+        [Fact]
+        public void GetObjectFromAlternateTest()
+        {
+            // Add 2 alternates for this repository, each with their own commit.
+            // Make sure that commits from the current repository and the alternates
+            // can be found.
+            //
+            // Alternate1    Alternate2
+            //     |             |
+            //     +-----+ +-----+
+            //            |
+            //          Repo
+            this.InitializeSourceControl();
+
+            var localCommit = this.LibGit2Repository.Commit("Local", this.Signer, this.Signer, new CommitOptions() { AllowEmptyCommit = true });
+
+            var alternate1Path = this.CreateDirectoryForNewRepo();
+            this.InitializeSourceControl(alternate1Path).Dispose();
+            var alternate1 = new Repository(alternate1Path);
+            var alternate1Commit = alternate1.Commit("Alternate 1", this.Signer, this.Signer, new CommitOptions() { AllowEmptyCommit = true });
+
+            var alternate2Path = this.CreateDirectoryForNewRepo();
+            this.InitializeSourceControl(alternate2Path).Dispose();
+            var alternate2 = new Repository(alternate2Path);
+            var alternate2Commit = alternate2.Commit("Alternate 2", this.Signer, this.Signer, new CommitOptions() { AllowEmptyCommit = true });
+
+            var objectDatabasePath = Path.Combine(this.RepoPath, ".git", "objects");
+
+            Directory.CreateDirectory(Path.Combine(this.RepoPath, ".git", "objects", "info"));
+            File.WriteAllText(
+                Path.Combine(this.RepoPath, ".git", "objects", "info", "alternates"),
+                $"{Path.GetRelativePath(objectDatabasePath, Path.Combine(alternate1Path, ".git", "objects"))}:{Path.GetRelativePath(objectDatabasePath, Path.Combine(alternate2Path, ".git", "objects"))}:");
+
+            using (GitRepository repository = GitRepository.Create(this.RepoPath))
+            {
+                Assert.Equal(localCommit.Sha, repository.GetCommit(GitObjectId.Parse(localCommit.Sha)).Sha.ToString());
+                Assert.Equal(alternate1Commit.Sha, repository.GetCommit(GitObjectId.Parse(alternate1Commit.Sha)).Sha.ToString());
+                Assert.Equal(alternate2Commit.Sha, repository.GetCommit(GitObjectId.Parse(alternate2Commit.Sha)).Sha.ToString());
+            }
+        }
+#endif
+
+        [Fact]
+        public void GetObjectByShaAndWrongTypeTest()
+        {
+            this.InitializeSourceControl();
+            this.AddCommits(2);
+
+            var headObjectId = GitObjectId.Parse(this.LibGit2Repository.Head.Tip.Sha);
+
+            using (var repository = GitRepository.Create(this.RepoPath))
+            {
+                Assert.Throws<GitException>(() => repository.GetObjectBySha(headObjectId, "tree"));
+            }
+        }
+
+        [Fact]
+        public void GetMissingObjectByShaTest()
+        {
+            this.InitializeSourceControl();
+            this.AddCommits(2);
+
+            var headObjectId = GitObjectId.Parse(this.LibGit2Repository.Head.Tip.Sha);
+
+            using (var repository = GitRepository.Create(this.RepoPath))
+            {
+                Assert.Throws<GitException>(() => repository.GetObjectBySha(GitObjectId.Parse("7d6b2c56ffb97eedb92f4e28583c093f7ee4b3d9"), "commit"));
+                Assert.Null(repository.GetObjectBySha(GitObjectId.Empty, "commit"));
+            }
         }
 
         [Fact]
@@ -127,6 +323,13 @@ namespace ManagedGitLib.Tests
                 a => Assert.Equal("C:/Users/nbgv/objects", a),
                 a => Assert.Equal("C:/Users/nbgv2/objects/", a),
                 a => Assert.Equal("../../clone/.git/objects", a));
+        }
+
+        private static void AssertPath(string expected, string actual)
+        {
+            Assert.Equal(
+                Path.GetFullPath(expected),
+                Path.GetFullPath(actual));
         }
     }
 }

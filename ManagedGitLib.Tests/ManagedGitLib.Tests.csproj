@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../ManagedGitLib/ManagedGitLib.csproj" />
+    <ProjectReference Include="../NerdBank.GitVersioning/NerdBank.GitVersioning.csproj" />
   </ItemGroup>
 
   <ItemGroup>
