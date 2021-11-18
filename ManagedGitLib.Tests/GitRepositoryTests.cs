@@ -45,10 +45,10 @@ namespace ManagedGitLib.Tests
 
             using (var repository = GitRepository.Create(workTreePath))
             {
-                AssertPath(Path.Combine(this.RepoPath, ".git"), repository.CommonDirectory);
-                AssertPath(Path.Combine(this.RepoPath, ".git", "worktrees", "myworktree"), repository.GitDirectory);
+                AssertPath(string.Concat(this.LibGit2Repository.Info.Path.SkipLast(1)), repository.CommonDirectory);
+                AssertPath(Path.Combine(this.LibGit2Repository.Info.Path, "worktrees", "myworktree"), repository.GitDirectory);
                 AssertPath(workTreePath, repository.WorkingDirectory);
-                AssertPath(Path.Combine(this.RepoPath, ".git", "objects"), repository.ObjectDirectory);
+                AssertPath(Path.Combine(this.LibGit2Repository.Info.Path, "objects"), repository.ObjectDirectory);
             }
         }
 
