@@ -47,6 +47,11 @@ namespace ManagedGitLib
         /// </summary>
         public GitSignature Author { get; set; }
 
+        /// <summary>
+        /// Gets or sets the committer of this commit.
+        /// </summary>
+        public GitSignature Committer { get; set; }
+
         /// <inheritdoc/>
         public override bool Equals(object? obj)
         {

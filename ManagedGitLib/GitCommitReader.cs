@@ -17,6 +17,7 @@ namespace ManagedGitLib
         private static readonly byte[] TreeStart = GitRepository.Encoding.GetBytes("tree ");
         private static readonly byte[] ParentStart = GitRepository.Encoding.GetBytes("parent ");
         private static readonly byte[] AuthorStart = GitRepository.Encoding.GetBytes("author ");
+        private static readonly byte[] CommitterStart = GitRepository.Encoding.GetBytes("committer ");
 
         private const int TreeLineLength = 46;
         private const int ParentLineLength = 48;
@@ -29,9 +30,6 @@ namespace ManagedGitLib
         /// </param>
         /// <param name="sha">
         /// The <see cref="GitObjectId"/> of the commit.
-        /// </param>
-        /// <param name="readAuthor">
-        /// A value indicating whether to populate the <see cref="GitCommit.Author"/> field.
         /// </param>
         /// <returns>
         /// The <see cref="GitCommit"/>.
@@ -67,9 +65,6 @@ namespace ManagedGitLib
         /// <param name="sha">
         /// The <see cref="GitObjectId"/> of the commit.
         /// </param>
-        /// <param name="readAuthor">
-        /// A value indicating whether to populate the <see cref="GitCommit.Author"/> field.
-        /// </param>
         /// <returns>
         /// The <see cref="GitCommit"/>.
         /// </returns>
@@ -103,12 +98,23 @@ namespace ManagedGitLib
                 buffer = buffer.Slice(ParentLineLength);
             }
 
-            GitSignature signature = default;
+            GitSignature authorSignature = default;
 
-            if (!TryReadAuthor(buffer, out signature))
+            if (!TryReadAuthor(buffer, out authorSignature, out int authorLineLength))
             {
-                throw new GitException();
+                throw new GitException("Unable to read commit author");
             }
+
+            buffer = buffer.Slice(authorLineLength);
+
+            GitSignature commiterSignature = default;
+
+            if (!TryReadCommitter(buffer, out commiterSignature, out int committerLineLength))
+            {
+                throw new GitException("Unable to read commit committer");
+            }
+
+            buffer = buffer.Slice(committerLineLength);
 
             return new GitCommit()
             {
@@ -117,7 +123,8 @@ namespace ManagedGitLib
                 SecondParent = secondParent,
                 AdditionalParents = additionalParents,
                 Tree = tree,
-                Author = signature,
+                Author = authorSignature,
+                Committer = commiterSignature
             };
         }
 
@@ -154,9 +161,10 @@ namespace ManagedGitLib
             return true;
         }
 
-        private static bool TryReadAuthor(ReadOnlySpan<byte> line, out GitSignature signature)
+        private static bool TryReadAuthor(ReadOnlySpan<byte> line, out GitSignature signature, out int lineLength)
         {
             signature = default;
+            lineLength = 0;
 
             if (!line.Slice(0, AuthorStart.Length).SequenceEqual(AuthorStart))
             {
@@ -167,7 +175,41 @@ namespace ManagedGitLib
 
             int emailStart = line.IndexOf((byte)'<');
             int emailEnd = line.IndexOf((byte)'>');
+            int lineEnd = line.IndexOf((byte)'\n');
+
+            lineLength = AuthorStart.Length + lineEnd + 1;
+
+            var name = line.Slice(0, emailStart - 1);
+            var email = line.Slice(emailStart + 1, emailEnd - emailStart - 1);
+            var time = line.Slice(emailEnd + 2, lineEnd - emailEnd - 2);
+
+            signature.Name = GitRepository.GetString(name);
+            signature.Email = GitRepository.GetString(email);
+
+            var offsetStart = time.IndexOf((byte)' ');
+            var ticks = long.Parse(GitRepository.GetString(time.Slice(0, offsetStart)));
+            signature.Date = DateTimeOffset.FromUnixTimeSeconds(ticks);
+
+            return true;
+        }
+
+        private static bool TryReadCommitter(ReadOnlySpan<byte> line, out GitSignature signature, out int lineLength)
+        {
+            signature = default;
+            lineLength = 0;
+
+            if (!line.Slice(0, CommitterStart.Length).SequenceEqual(CommitterStart))
+            {
+                return false;
+            }
+
+            line = line.Slice(CommitterStart.Length);
+
+            int emailStart = line.IndexOf((byte)'<');
+            int emailEnd = line.IndexOf((byte)'>');
             var lineEnd = line.IndexOf((byte)'\n');
+
+            lineLength = CommitterStart.Length + lineEnd + 1;
 
             var name = line.Slice(0, emailStart - 1);
             var email = line.Slice(emailStart + 1, emailEnd - emailStart - 1);
