@@ -74,7 +74,7 @@ namespace ManagedGitLib.Tests
             {
                 var head = repository.GetHeadAsReferenceOrSha();
                 var reference = Assert.IsType<string>(head);
-                Assert.Equal("refs/heads/main", reference);
+                Assert.Equal(this.LibGit2Repository.Head.ToString(), reference);
 
                 Assert.Equal(headObjectId, repository.GetHeadCommitSha());
 
@@ -119,7 +119,7 @@ namespace ManagedGitLib.Tests
             {
                 var head = repository.GetHeadAsReferenceOrSha();
                 var reference = Assert.IsType<string>(head);
-                Assert.Equal("refs/heads/main", reference);
+                Assert.Equal(this.LibGit2Repository.Head.ToString(), reference);
 
                 Assert.Equal(GitObjectId.Empty, repository.GetHeadCommitSha());
 
