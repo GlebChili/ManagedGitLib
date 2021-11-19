@@ -18,14 +18,7 @@ namespace ManagedGitLib.ExtendedTests
             foreach (FileInfo file in directory.GetFiles())
             {
                 File.SetAttributes(file.FullName, FileAttributes.Normal);
-                try
-                {
-                    File.Delete(file.FullName);
-                }
-                catch (UnauthorizedAccessException e)
-                {
-                    Console.WriteLine("Can't delete file. Reason: " + e.Message);
-                }
+                File.Delete(file.FullName);
             }
 
             foreach (DirectoryInfo subdirectory in directory.GetDirectories())
