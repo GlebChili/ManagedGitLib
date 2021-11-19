@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Xunit;
+using Xunit.Abstractions;
 using LibGit2Sharp;
 using System.Diagnostics;
 
@@ -13,6 +14,7 @@ namespace ManagedGitLib.ExtendedTests
 
         public DirectoryInfo RepoDirectory => repoDirectory;
         public Repository Repo => repo;
+        public ITestOutputHelper? OutputHelper { get; set; }
 
         public MonoRepoProvider()
         {
@@ -35,18 +37,30 @@ namespace ManagedGitLib.ExtendedTests
         {
             repo.Dispose();
 
-            repoDirectory.SetFilesAttributesToNormal();
-            repoDirectory.Delete(true);
+            // For some unknown issue, git pack files can't be deleted, when tests are running on GitHub Windows runners
+            if (OperatingSystem.IsWindows() && Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
+            {
+                OutputHelper!.WriteLine($"{nameof(MonoRepoProvider)}: Tests are running on GitHub Windows runners. " +
+                                       $"Test repository cleanup won't be performed");
+            }
+            else
+            {
+                repoDirectory.SetFilesAttributesToNormal();
+                repoDirectory.Delete(true);
+            }
         }
     }
 
     public class TestAgainstRealMonoRepo : IClassFixture<MonoRepoProvider>
     {
         readonly MonoRepoProvider repoProvider;
+        readonly ITestOutputHelper output;
 
-        public TestAgainstRealMonoRepo(MonoRepoProvider repoProvider)
+        public TestAgainstRealMonoRepo(MonoRepoProvider repoProvider, ITestOutputHelper output)
         {
             this.repoProvider = repoProvider;
+            this.output = output;
+            repoProvider.OutputHelper = output;
         }
 
         [Fact]
