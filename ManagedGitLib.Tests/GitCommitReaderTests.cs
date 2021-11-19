@@ -64,17 +64,15 @@ namespace ManagedGitLib.Tests
                 Assert.Equal("noreply@github.com", committer.Email);
                 Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1599746832), committer.Date);
 
-                string expectedGpgSig = @"-----BEGIN PGP SIGNATURE-----
-
- wsBcBAABCAAQBQJfWjMQCRBK7hj4Ov3rIwAAdHIIABsTXgfvq1GoksuPtrQ5z3H4
- rL7zsWMfz0+Cb4VUaN5hCoHx58RYXMdmf/VLvFsQacUOvCVevAKaFm1g6fckJ0Rg
- p7SkE6Np9v0OisAj8SrHqsHNk9aoTvu2781doKtQmsBWXB+NYxNR3v3jmehn6h1v
- lTSwn4NHZRhDLEo1BRQR/ZuqZin437/73M6BY2LHwoEyA1ZDFigHHyuwaS4jWzn3
- qESGl9zNddpUvqkJtjDzQp7eoPI/fr76fBuFyrUMVe0yziNbuBUAU6UJKO0eS5y9
- QDN2Jfh1WnagHZ7L6GgYn72CK6q3QYFvNQSDHGJroj3Lc6rmxeD0/Jk1X43fDTE=
- =SzYu
- -----END PGP SIGNATURE-----
-";
+                string expectedGpgSig = "-----BEGIN PGP SIGNATURE-----\n\n " +
+                                        "wsBcBAABCAAQBQJfWjMQCRBK7hj4Ov3rIwAAdHIIABsTXgfvq1GoksuPtrQ5z3H4\n " +
+                                        "rL7zsWMfz0+Cb4VUaN5hCoHx58RYXMdmf/VLvFsQacUOvCVevAKaFm1g6fckJ0Rg\n " +
+                                        "p7SkE6Np9v0OisAj8SrHqsHNk9aoTvu2781doKtQmsBWXB+NYxNR3v3jmehn6h1v\n " +
+                                        "lTSwn4NHZRhDLEo1BRQR/ZuqZin437/73M6BY2LHwoEyA1ZDFigHHyuwaS4jWzn3\n " +
+                                        "qESGl9zNddpUvqkJtjDzQp7eoPI/fr76fBuFyrUMVe0yziNbuBUAU6UJKO0eS5y9\n " +
+                                        "QDN2Jfh1WnagHZ7L6GgYn72CK6q3QYFvNQSDHGJroj3Lc6rmxeD0/Jk1X43fDTE=\n " +
+                                        "=SzYu\n " +
+                                        "-----END PGP SIGNATURE-----\n";
 
                 Assert.Equal(expectedGpgSig, GitRepository.Encoding.GetString(commit.GpgSignature!));
 
