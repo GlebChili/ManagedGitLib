@@ -85,5 +85,41 @@ namespace ManagedGitLib.ExtendedTests
             Assert.Equal(repoProvider.Repo.Head.Tip.Committer.Email, headCommit!.Value.Committer.Email);
             Assert.Equal(repoProvider.Repo.Head.Tip.Committer.When, headCommit!.Value.Committer.Date);
         }
+
+        [Fact]
+        public void GetCommitBySha1()
+        {
+            using GitRepository repo = GitRepository.Create(repoProvider.RepoDirectory.FullName)!;
+
+            Assert.NotNull(repo);
+
+            GitCommit testCommit = repo.GetCommit(GitObjectId.Parse("1e2d68b92c9df9147b6c21de4e96c392f6c2ea00"));
+
+            GitSignature author = testCommit.Author;
+            GitSignature committer = testCommit.Committer;
+
+            Assert.Equal("Alexander Köplinger", author.Name);
+            Assert.Equal("alex.koeplinger@outlook.com", author.Email);
+            Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1580213767), author.Date);
+
+            Assert.Equal("Alexander Köplinger", committer.Name);
+            Assert.Equal("alex.koeplinger@outlook.com", committer.Email);
+            Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1580213767), committer.Date);
+
+            Assert.Null(testCommit.GpgSignature);
+
+            string expectedCommitMessage = "Bump bockbuild for Pango patch\n\n" +
+                                           "Fixes bug #1048838, correct SF font not loading in VSMac\n\n" +
+                                           "Backport of https://github.com/mono/mono/pull/18566";
+
+            Assert.Equal(expectedCommitMessage, testCommit.Message);
+
+            Assert.Equal("3ad9ae0c77b19e8f4ac5904cfd03f282f189aad1", testCommit.Tree.ToString());
+
+            Assert.NotNull(testCommit.FirstParent);
+            Assert.Equal("e55302cb080450bbb9e71ff3a6b4ecf3ce52183e", testCommit.FirstParent!.Value.ToString());
+
+            Assert.Null(testCommit.SecondParent);
+        }
     }
 }
