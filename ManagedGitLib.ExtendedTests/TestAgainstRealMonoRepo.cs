@@ -14,7 +14,6 @@ namespace ManagedGitLib.ExtendedTests
 
         public DirectoryInfo RepoDirectory => repoDirectory;
         public Repository Repo => repo;
-        public ITestOutputHelper? OutputHelper { get; set; }
 
         public MonoRepoProvider()
         {
@@ -40,7 +39,7 @@ namespace ManagedGitLib.ExtendedTests
             // For some unknown issue, git pack files can't be deleted, when tests are running on GitHub Windows runners
             if (OperatingSystem.IsWindows() && Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
             {
-                OutputHelper!.WriteLine($"{nameof(MonoRepoProvider)}: Tests are running on GitHub Windows runners. " +
+                Console.WriteLine($"{nameof(MonoRepoProvider)}: Tests are running on GitHub Windows runners. " +
                                        $"Test repository cleanup won't be performed");
             }
             else
@@ -54,13 +53,10 @@ namespace ManagedGitLib.ExtendedTests
     public class TestAgainstRealMonoRepo : IClassFixture<MonoRepoProvider>
     {
         readonly MonoRepoProvider repoProvider;
-        readonly ITestOutputHelper output;
 
-        public TestAgainstRealMonoRepo(MonoRepoProvider repoProvider, ITestOutputHelper output)
+        public TestAgainstRealMonoRepo(MonoRepoProvider repoProvider)
         {
             this.repoProvider = repoProvider;
-            this.output = output;
-            repoProvider.OutputHelper = output;
         }
 
         [Fact]
