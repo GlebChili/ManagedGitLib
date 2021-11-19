@@ -2,7 +2,7 @@ using Xunit;
 
 namespace ManagedGitLib.ExtendedTests
 {
-    public class UnitTest1
+    public class TestAgainstRealRepo
     {
         [Fact]
         public void Test1()

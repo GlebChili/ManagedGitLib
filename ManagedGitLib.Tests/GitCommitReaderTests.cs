@@ -76,7 +76,7 @@ namespace ManagedGitLib.Tests
 
                 Assert.Equal(expectedGpgSig, GitRepository.Encoding.GetString(commit.GpgSignature!));
 
-                using Stream commitMessageStream = TestUtilities.GetEmbeddedResource(@"commit_message.txt");
+                using Stream commitMessageStream = TestUtilities.GetEmbeddedResource(@"commit_message");
                 byte[] commitMessageBuffer = new byte[commitMessageStream.Length];
                 commitMessageStream.ReadAll(commitMessageBuffer);
                 string expectedCommitMessage = GitRepository.Encoding.GetString(commitMessageBuffer);
