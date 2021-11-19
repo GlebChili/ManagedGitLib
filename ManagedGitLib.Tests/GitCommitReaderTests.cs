@@ -64,7 +64,7 @@ namespace ManagedGitLib.Tests
                 Assert.Equal("noreply@github.com", committer.Email);
                 Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1599746832), committer.Date);
 
-                byte[] sigbytes = GitRepository.Encoding.GetBytes(@"-----BEGIN PGP SIGNATURE-----
+                string expectedGpgSig = @"-----BEGIN PGP SIGNATURE-----
 
  wsBcBAABCAAQBQJfWjMQCRBK7hj4Ov3rIwAAdHIIABsTXgfvq1GoksuPtrQ5z3H4
  rL7zsWMfz0+Cb4VUaN5hCoHx58RYXMdmf/VLvFsQacUOvCVevAKaFm1g6fckJ0Rg
@@ -74,9 +74,9 @@ namespace ManagedGitLib.Tests
  QDN2Jfh1WnagHZ7L6GgYn72CK6q3QYFvNQSDHGJroj3Lc6rmxeD0/Jk1X43fDTE=
  =SzYu
  -----END PGP SIGNATURE-----
-");
+";
 
-                Assert.Equal<byte>(sigbytes, commit.GpgSignature);
+                Assert.Equal(expectedGpgSig, GitRepository.Encoding.GetString(commit.GpgSignature!));
 
                 using Stream commitMessageStream = TestUtilities.GetEmbeddedResource(@"commit_message.txt");
                 byte[] commitMessageBuffer = new byte[commitMessageStream.Length];
