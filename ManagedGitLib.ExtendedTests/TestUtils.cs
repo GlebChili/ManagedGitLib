@@ -18,6 +18,7 @@ namespace ManagedGitLib.ExtendedTests
             foreach (FileInfo file in directory.GetFiles())
             {
                 File.SetAttributes(file.FullName, FileAttributes.Normal);
+                File.Delete(file.FullName);
             }
 
             foreach (DirectoryInfo subdirectory in directory.GetDirectories())
