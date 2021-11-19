@@ -72,7 +72,7 @@ namespace ManagedGitLib.Tests
                                         "qESGl9zNddpUvqkJtjDzQp7eoPI/fr76fBuFyrUMVe0yziNbuBUAU6UJKO0eS5y9\n " +
                                         "QDN2Jfh1WnagHZ7L6GgYn72CK6q3QYFvNQSDHGJroj3Lc6rmxeD0/Jk1X43fDTE=\n " +
                                         "=SzYu\n " +
-                                        "-----END PGP SIGNATURE-----\n";
+                                        "-----END PGP SIGNATURE-----\n \n";
 
                 Assert.Equal(expectedGpgSig, GitRepository.Encoding.GetString(commit.GpgSignature!));
 

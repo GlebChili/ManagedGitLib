@@ -40,21 +40,40 @@ namespace ManagedGitLib.ExtendedTests
         }
     }
 
-    public class TestAgainstRealRepo : IClassFixture<MonoRepoProvider>
+    public class TestAgainstRealMonoRepo : IClassFixture<MonoRepoProvider>
     {
         readonly MonoRepoProvider repoProvider;
 
-        public TestAgainstRealRepo(MonoRepoProvider repoProvider)
+        public TestAgainstRealMonoRepo(MonoRepoProvider repoProvider)
         {
             this.repoProvider = repoProvider;
         }
 
         [Fact]
-        public void GetCommitById1()
+        public void OpenRepoAndCheckHead()
         {
             using GitRepository? repo = GitRepository.Create(repoProvider.RepoDirectory.FullName);
 
             Assert.NotNull(repo);
+
+            string? headName = repo!.GetHeadAsReferenceOrSha() as string;
+
+            Assert.NotNull(headName);
+            Assert.Equal(repoProvider.Repo.Head.ToString(), headName);
+
+            GitCommit? headCommit = repo.GetHeadCommit();
+
+            Assert.NotNull(headCommit);
+            Assert.Equal(repoProvider.Repo.Head.Tip.Sha, headCommit!.Value.Sha.ToString());
+            Assert.Equal(repoProvider.Repo.Head.Tip.Message, headCommit!.Value.Message);
+
+            Assert.Equal(repoProvider.Repo.Head.Tip.Author.Name, headCommit!.Value.Author.Name);
+            Assert.Equal(repoProvider.Repo.Head.Tip.Author.Email, headCommit!.Value.Author.Email);
+            Assert.Equal(repoProvider.Repo.Head.Tip.Author.When, headCommit!.Value.Author.Date);
+
+            Assert.Equal(repoProvider.Repo.Head.Tip.Committer.Name, headCommit!.Value.Committer.Name);
+            Assert.Equal(repoProvider.Repo.Head.Tip.Committer.Email, headCommit!.Value.Committer.Email);
+            Assert.Equal(repoProvider.Repo.Head.Tip.Committer.When, headCommit!.Value.Committer.Date);
         }
     }
 }
