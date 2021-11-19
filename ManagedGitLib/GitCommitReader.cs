@@ -19,6 +19,7 @@ namespace ManagedGitLib
         private static readonly byte[] AuthorStart = GitRepository.Encoding.GetBytes("author ");
         private static readonly byte[] CommitterStart = GitRepository.Encoding.GetBytes("committer ");
         private static readonly byte[] GpgsigStart = GitRepository.Encoding.GetBytes("gpgsig ");
+        private static readonly byte[] GpgsigEnd = GitRepository.Encoding.GetBytes("-----END PGP SIGNATURE-----\n");
         private static readonly byte[] MessageStart = GitRepository.Encoding.GetBytes("\n");
 
         private const int TreeLineLength = 46;
@@ -255,10 +256,10 @@ namespace ManagedGitLib
 
             buffer = buffer.Slice(GpgsigStart.Length);
 
-            int indexOfDoubleLineEnd = buffer.IndexOf(GitRepository.Encoding.GetBytes("\n\n"));
+            int indexOfGpgsigEnd = buffer.IndexOf(GpgsigEnd);
 
-            gpgsigLength = GpgsigStart.Length + indexOfDoubleLineEnd + 1;
-            gpgSignature = buffer.Slice(0, indexOfDoubleLineEnd).ToArray();
+            gpgsigLength = indexOfGpgsigEnd + GpgsigEnd.Length + GpgsigStart.Length;
+            gpgSignature = buffer.Slice(0, indexOfGpgsigEnd + GpgsigEnd.Length).ToArray();
 
             return true;
         }
