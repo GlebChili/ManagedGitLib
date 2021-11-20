@@ -5,6 +5,7 @@ using Xunit.Abstractions;
 using LibGit2Sharp;
 using System.Diagnostics;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace ManagedGitLib.ExtendedTests
 {
@@ -174,6 +175,43 @@ namespace ManagedGitLib.ExtendedTests
             string expectedCommitSignature = GitRepository.Encoding.GetString(signatureMessageBuffer);
 
             Assert.Equal(expectedCommitSignature, GitRepository.Encoding.GetString(testCommit.GpgSignature!));
+        }
+
+        static int CountCommits(GitRepository repo)
+        {
+            int counter = 0;
+            Queue<GitCommit> queue = new Queue<GitCommit>();
+
+            GitCommit? headCommit = repo.GetHeadCommit();
+
+            if (headCommit is not null)
+            {
+                queue.Enqueue(headCommit.Value);
+            }
+
+            while (queue.Count != 0)
+            {
+                GitCommit commit = queue.Dequeue();
+
+                counter++;
+
+                if (commit.FirstParent is not null)
+                {
+                    queue.Enqueue(repo.GetCommit(commit.FirstParent!.Value));
+                }
+            }
+
+            return counter;
+        }
+
+        [Fact]
+        public void CountCommitsFromHead()
+        {
+            using GitRepository repo = GitRepository.Create(repoProvider.RepoDirectory.FullName)!;
+
+            int expectedNumber = repoProvider.Repo.Commits.Count();
+
+            Assert.Equal(expectedNumber, CountCommits(repo));
         }
     }
 }
