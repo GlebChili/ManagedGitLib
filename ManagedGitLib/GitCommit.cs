@@ -53,11 +53,6 @@ namespace ManagedGitLib
         public GitSignature Committer { get; set; }
 
         /// <summary>
-        /// Gets or sets commit GPG signature
-        /// </summary>
-        public byte[]? GpgSignature { get; set; }
-
-        /// <summary>
         /// Gets or sets commit message
         /// </summary>
         public string Message { get; set; }

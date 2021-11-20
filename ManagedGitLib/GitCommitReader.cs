@@ -18,8 +18,6 @@ namespace ManagedGitLib
         private static readonly byte[] ParentStart = GitRepository.Encoding.GetBytes("parent ");
         private static readonly byte[] AuthorStart = GitRepository.Encoding.GetBytes("author ");
         private static readonly byte[] CommitterStart = GitRepository.Encoding.GetBytes("committer ");
-        private static readonly byte[] GpgsigStart = GitRepository.Encoding.GetBytes("gpgsig ");
-        private static readonly byte[] GpgsigEnd = GitRepository.Encoding.GetBytes("-----END PGP SIGNATURE-----\n \n");
         private static readonly byte[] MessageStart = GitRepository.Encoding.GetBytes("\n");
 
         private const int TreeLineLength = 46;
@@ -119,11 +117,9 @@ namespace ManagedGitLib
 
             buffer = buffer.Slice(committerLineLength);
 
-            byte[]? gpgSignature = null;
-
-            if (TryReadGpgsig(buffer, out gpgSignature, out int gpgSignatureLength))
+            while (TryReadAdditionalHeaders(buffer, out int additionalHeaderLength))
             {
-                buffer = buffer.Slice(gpgSignatureLength);
+                buffer = buffer.Slice(additionalHeaderLength);
             }
 
             string message = "";
@@ -142,7 +138,6 @@ namespace ManagedGitLib
                 Tree = tree,
                 Author = authorSignature,
                 Committer = commiterSignature,
-                GpgSignature = gpgSignature,
                 Message = message
             };
         }
@@ -202,8 +197,23 @@ namespace ManagedGitLib
             var email = line.Slice(emailStart + 1, emailEnd - emailStart - 1);
             var time = line.Slice(emailEnd + 2, lineEnd - emailEnd - 2);
 
-            signature.Name = GitRepository.GetString(name);
-            signature.Email = GitRepository.GetString(email);
+            if (name.Length != 0)
+            {
+                signature.Name = GitRepository.GetString(name);
+            }
+            else
+            {
+                signature.Name = "";
+            }
+
+            if (email.Length != 0)
+            {
+                signature.Email = GitRepository.GetString(email);
+            }
+            else
+            {
+                signature.Email = "";
+            }
 
             var offsetStart = time.IndexOf((byte)' ');
             var ticks = long.Parse(GitRepository.GetString(time.Slice(0, offsetStart)));
@@ -234,8 +244,23 @@ namespace ManagedGitLib
             var email = line.Slice(emailStart + 1, emailEnd - emailStart - 1);
             var time = line.Slice(emailEnd + 2, lineEnd - emailEnd - 2);
 
-            signature.Name = GitRepository.GetString(name);
-            signature.Email = GitRepository.GetString(email);
+            if (name.Length != 0)
+            {
+                signature.Name = GitRepository.GetString(name);
+            }
+            else
+            {
+                signature.Name = "";
+            }
+
+            if (email.Length != 0)
+            {
+                signature.Email = GitRepository.GetString(email);
+            }
+            else
+            {
+                signature.Email = "";
+            }
 
             var offsetStart = time.IndexOf((byte)' ');
             var ticks = long.Parse(GitRepository.GetString(time.Slice(0, offsetStart)));
@@ -244,22 +269,18 @@ namespace ManagedGitLib
             return true;
         }
 
-        private static bool TryReadGpgsig(ReadOnlySpan<byte> buffer, out byte[]? gpgSignature, out int gpgsigLength)
+        private static bool TryReadAdditionalHeaders(ReadOnlySpan<byte> buffer, out int additionalHeaderLength)
         {
-            gpgSignature = null;
-            gpgsigLength = 0;
+            additionalHeaderLength = 0;
 
-            if (!buffer.Slice(0, GpgsigStart.Length).SequenceEqual(GpgsigStart))
+            if (buffer.Slice(0, MessageStart.Length).SequenceEqual(MessageStart))
             {
                 return false;
             }
 
-            buffer = buffer.Slice(GpgsigStart.Length);
+            var lineEnd = buffer.IndexOf((byte)'\n');
 
-            int indexOfGpgsigEnd = buffer.IndexOf(GpgsigEnd);
-
-            gpgsigLength = indexOfGpgsigEnd + GpgsigEnd.Length + GpgsigStart.Length;
-            gpgSignature = buffer.Slice(0, indexOfGpgsigEnd + GpgsigEnd.Length).ToArray();
+            additionalHeaderLength = lineEnd + 1;
 
             return true;
         }

@@ -113,8 +113,6 @@ namespace ManagedGitLib.ExtendedTests
             Assert.Equal("alex.koeplinger@outlook.com", committer.Email);
             Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1580213767), committer.Date);
 
-            Assert.Null(testCommit.GpgSignature);
-
             string expectedCommitMessage = "Bump bockbuild for Pango patch\n\n" +
                                            "Fixes bug #1048838, correct SF font not loading in VSMac\n\n" +
                                            "Backport of https://github.com/mono/mono/pull/18566";
@@ -166,21 +164,13 @@ namespace ManagedGitLib.ExtendedTests
             Assert.Null(testCommit.SecondParent);
 
             Assert.Single(testCommit.Parents);
-
-            Assert.NotNull(testCommit.GpgSignature);
-
-            Stream signatureMessageStream = TestUtils.GetEmbeddedResource("commit2-signature");
-            byte[] signatureMessageBuffer = new byte[signatureMessageStream.Length];
-            signatureMessageStream.ReadAll(signatureMessageBuffer);
-            string expectedCommitSignature = GitRepository.Encoding.GetString(signatureMessageBuffer);
-
-            Assert.Equal(expectedCommitSignature, GitRepository.Encoding.GetString(testCommit.GpgSignature!));
         }
 
         static int CountCommits(GitRepository repo)
         {
             int counter = 0;
             Queue<GitCommit> queue = new Queue<GitCommit>();
+            HashSet<GitObjectId> setOfCommitIds = new HashSet<GitObjectId>();
 
             GitCommit? headCommit = repo.GetHeadCommit();
 
@@ -195,9 +185,19 @@ namespace ManagedGitLib.ExtendedTests
 
                 counter++;
 
-                if (commit.FirstParent is not null)
+                setOfCommitIds.Add(commit.Sha);
+
+                foreach (GitObjectId parentId in commit.Parents)
                 {
-                    queue.Enqueue(repo.GetCommit(commit.FirstParent!.Value));
+                    if (!setOfCommitIds.Contains(parentId))
+                    {
+                        GitCommit parentCommit = repo.GetCommit(parentId);
+                        queue.Enqueue(parentCommit);
+                    }
+                    else
+                    {
+                        int bb = 1;
+                    }
                 }
             }
 
