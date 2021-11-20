@@ -1,0 +1,36 @@
+2020 02 backport metadata fixes (#21190)
+
+* [mono] Fix race during mono_image_storage_open (#21142)
+
+* The mono_refcount_inc call in mono_image_storage_trypublish or
+  mono_image_storage_tryaddref may abort when racing against a
+  mono_image_storage_dtor that already decremented the refcount.
+
+This race triggered in some cases when building aspnetcore using a Mono-based dotnet host SDK.   The problem is that `mono_image_storage_close` runs outside the `mono_images_storage_lock` (and this may be unavoidable due to lock ordering concerns).  Therefore, we can have a refcount that was already decremented to zero, but before `mono_image_storage_dtor` finishes removing the object from `images_storage_hash`, a parallel `mono_image_storage_trypublish` may have retrieved it from there.  In that case, the `mono_refcount_inc` call will abort.
+
+Fixed by detecting that case via `mono_refcount_tryinc` instead, and simply treating the object as if it had already been removed.  It will in time actually get removed, either by the parallel `mono_image_storage_dtor`, or else by the `g_hash_table_insert` in `mono_image_storage_trypublish` (which will safely replace it with the new object, and `mono_image_storage_dtor` will then detect that and skip removal).
+
+Co-authored-by: uweigand <uweigand@users.noreply.github.com>
+
+* [metadata] Handle MONO_TYPE_FNPTR case in collect_type_images (#19434)
+
+Fixes abort when PTR-FNPTR field signature is encountered.
+
+Fixes https://github.com/mono/mono/issues/12098
+Fixes https://github.com/mono/mono/issues/17113
+Fixes https://github.com/mono/mono/issues/19433
+
+* Ensure generic parameter constraint type is included when building image (#19395)
+
+sets.
+
+Making associated change to type_in_image to also check the constrained type for a match. Re-adding asserts now they they no longer trigger.
+
+fixup, accidentally used old function
+
+adjusting coding convention to K&R
+
+Co-authored-by: monojenkins <jo.shields+jenkins@xamarin.com>
+Co-authored-by: uweigand <uweigand@users.noreply.github.com>
+Co-authored-by: Jeff Smith <whydoubt@gmail.com>
+Co-authored-by: Alex Thibodeau <alexthibodeau@unity3d.com>
