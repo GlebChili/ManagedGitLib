@@ -25,4 +25,8 @@
     <ProjectReference Include="../ManagedGitLib/ManagedGitLib.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="commit*" />
+  </ItemGroup>
+
 </Project>

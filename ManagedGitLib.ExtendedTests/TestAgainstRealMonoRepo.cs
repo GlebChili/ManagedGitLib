@@ -4,6 +4,7 @@ using Xunit;
 using Xunit.Abstractions;
 using LibGit2Sharp;
 using System.Diagnostics;
+using System.Linq;
 
 namespace ManagedGitLib.ExtendedTests
 {
@@ -120,6 +121,54 @@ namespace ManagedGitLib.ExtendedTests
             Assert.Equal("e55302cb080450bbb9e71ff3a6b4ecf3ce52183e", testCommit.FirstParent!.Value.ToString());
 
             Assert.Null(testCommit.SecondParent);
+
+            Assert.Single(testCommit.Parents);
+        }
+
+        [Fact]
+        public void GetCommitBySha2()
+        {
+            using GitRepository repo = GitRepository.Create(repoProvider.RepoDirectory.FullName)!;
+
+            Assert.NotNull(repo);
+
+            GitCommit testCommit = repo.GetCommit(GitObjectId.Parse("3cf59ad33daa57120ec2d3ca97cfdff4c89ca372"));
+
+            GitSignature author = testCommit.Author;
+            GitSignature committer = testCommit.Committer;
+
+            Assert.Equal("Marius Ungureanu", author.Name);
+            Assert.Equal("marius.ungureanu@xamarin.com", author.Email);
+            Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1629381061), author.Date);
+
+            Assert.Equal("GitHub", committer.Name);
+            Assert.Equal("noreply@github.com", committer.Email);
+            Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1629381061), author.Date);
+
+            Stream commitMessageStream = TestUtils.GetEmbeddedResource("commit2-message");
+            byte[] commitMessageBuffer = new byte[commitMessageStream.Length];
+            commitMessageStream.ReadAll(commitMessageBuffer);
+            string expectedCommitMessage = GitRepository.Encoding.GetString(commitMessageBuffer);
+
+            Assert.Equal(expectedCommitMessage, testCommit.Message);
+
+            Assert.Equal("b92897da2b6e46a512c8c19e7132c33a662542e9", testCommit.Tree.ToString());
+
+            Assert.NotNull(testCommit.FirstParent);
+            Assert.Equal("1e649b6338669d32c92bc882af968f68e4c14896", testCommit.FirstParent!.Value.ToString());
+
+            Assert.Null(testCommit.SecondParent);
+
+            Assert.Single(testCommit.Parents);
+
+            Assert.NotNull(testCommit.GpgSignature);
+
+            Stream signatureMessageStream = TestUtils.GetEmbeddedResource("commit2-signature");
+            byte[] signatureMessageBuffer = new byte[signatureMessageStream.Length];
+            signatureMessageStream.ReadAll(signatureMessageBuffer);
+            string expectedCommitSignature = GitRepository.Encoding.GetString(signatureMessageBuffer);
+
+            Assert.Equal(expectedCommitSignature, GitRepository.Encoding.GetString(testCommit.GpgSignature!));
         }
     }
 }

@@ -4,11 +4,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Reflection;
+using Validation;
 
 namespace ManagedGitLib.ExtendedTests
 {
     public class TestUtils
     {
+        internal static Stream GetEmbeddedResource(string resourcePath)
+        {
+            Requires.NotNullOrEmpty(resourcePath, nameof(resourcePath));
+
+            return Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream($"ManagedGitLib.ExtendedTests.{resourcePath.Replace('\\', '.')}");
+        }
     }
 
     public static class HelperExtensions
