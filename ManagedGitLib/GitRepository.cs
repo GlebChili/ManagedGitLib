@@ -301,9 +301,6 @@ namespace ManagedGitLib
         /// <summary>
         /// Gets the current HEAD commit, if available.
         /// </summary>
-        /// <param name="readAuthor">
-        /// A value indicating whether to populate the <see cref="GitCommit.Author"/> field.
-        /// </param>
         /// <returns>
         /// The current HEAD commit, or <see langword="null"/> if not available.
         /// </returns>
@@ -324,9 +321,6 @@ namespace ManagedGitLib
         /// </summary>
         /// <param name="sha">
         /// The Git object Id of the commit.
-        /// </param>
-        /// <param name="readAuthor">
-        /// A value indicating whether to populate the <see cref="GitCommit.Author"/> field.
         /// </param>
         /// <returns>
         /// The requested commit.
