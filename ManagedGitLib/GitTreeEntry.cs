@@ -14,7 +14,7 @@ namespace ManagedGitLib
         /// The name of the entry.
         /// </param>
         /// <param name="isFile">
-        /// A vaolue indicating whether the current entry is a file.
+        /// A value indicating whether the current entry is a file.
         /// </param>
         /// <param name="sha">
         /// The Git object Id of the blob or tree of the current entry.
