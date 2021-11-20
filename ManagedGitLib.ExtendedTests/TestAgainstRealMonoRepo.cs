@@ -99,11 +99,16 @@ namespace ManagedGitLib.ExtendedTests
             GitSignature author = testCommit.Author;
             GitSignature committer = testCommit.Committer;
 
-            Assert.Equal("Alexander Köplinger", author.Name);
+            Stream expectedAuthorNameStream = TestUtils.GetEmbeddedResource("commit1-author-name");
+            byte[] expectedAuthorNameBuffer = new byte[expectedAuthorNameStream.Length];
+            expectedAuthorNameStream.ReadAll(expectedAuthorNameBuffer);
+            string expectedAuthorName = GitRepository.Encoding.GetString(expectedAuthorNameBuffer);
+
+            Assert.Equal(expectedAuthorName, author.Name);
             Assert.Equal("alex.koeplinger@outlook.com", author.Email);
             Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1580213767), author.Date);
 
-            Assert.Equal("Alexander Köplinger", committer.Name);
+            Assert.Equal(expectedAuthorName, committer.Name);
             Assert.Equal("alex.koeplinger@outlook.com", committer.Email);
             Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1580213767), committer.Date);
 
