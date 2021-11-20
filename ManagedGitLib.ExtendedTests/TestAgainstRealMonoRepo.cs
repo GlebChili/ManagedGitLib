@@ -191,12 +191,8 @@ namespace ManagedGitLib.ExtendedTests
                 {
                     if (!setOfCommitIds.Contains(parentId))
                     {
-                        GitCommit parentCommit = repo.GetCommit(parentId);
-                        queue.Enqueue(parentCommit);
-                    }
-                    else
-                    {
-                        int bb = 1;
+                        setOfCommitIds.Add(parentId);
+                        queue.Enqueue(repo.GetCommit(parentId));
                     }
                 }
             }

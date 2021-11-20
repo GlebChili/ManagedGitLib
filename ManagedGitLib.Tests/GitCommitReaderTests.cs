@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace ManagedGitLib.Tests
@@ -68,6 +70,28 @@ namespace ManagedGitLib.Tests
                 string expectedCommitMessage = GitRepository.Encoding.GetString(commitMessageBuffer);
 
                 Assert.Equal(expectedCommitMessage, commit.Message);
+            }
+        }
+
+        [Fact]
+        public void ReadCommitWithThreeParents()
+        {
+            using (Stream stream = TestUtilities.GetEmbeddedResource(@"commit-ab39e8acac105fa0db88514f259341c9f0201b22"))
+            {
+                var commit = GitCommitReader.Read(stream, GitObjectId.Parse("ab39e8acac105fa0db88514f259341c9f0201b22"));
+
+                Assert.Equal(3, commit.Parents.Count());
+
+                List<GitObjectId> parents = new List<GitObjectId>();
+
+                foreach (var parent in commit.Parents)
+                {
+                    parents.Add(parent);
+                }
+
+                Assert.Equal(GitObjectId.Parse("e0b4d66ef7915417e04e88d5fa173185bb940029"), parents[0]);
+                Assert.Equal(GitObjectId.Parse("10e67ce38fbee44b3f5584d4f9df6de6c5f4cc5c"), parents[1]);
+                Assert.Equal(GitObjectId.Parse("a7fef320334121af85dce4b9b731f6c9a9127cfd"), parents[2]);
             }
         }
     }
