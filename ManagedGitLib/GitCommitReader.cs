@@ -150,8 +150,13 @@ namespace ManagedGitLib
             //  space: 1 byte
             //  hash: 40 bytes
             //  \n: 1 byte
-            Debug.Assert(line.Slice(0, TreeStart.Length).SequenceEqual(TreeStart));
-            Debug.Assert(line[TreeLineLength - 1] == (byte)'\n');
+            bool hasCorrectPrefix = line.Slice(0, TreeStart.Length).SequenceEqual(TreeStart);
+            bool hasCorrectLength = line[TreeLineLength - 1] == (byte)'\n';
+
+            if (!(hasCorrectLength && hasCorrectPrefix))
+            {
+                throw new Exception("Unable to read commit tree");
+            }
 
             return GitObjectId.ParseHex(line.Slice(TreeStart.Length, 40));
         }
