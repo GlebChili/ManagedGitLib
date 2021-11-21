@@ -1,0 +1,6 @@
+object bef1e6335812d32f8eab648c0228fc624b9f8357
+type commit
+tag mono-6.6.0.161
+tagger Xamarin Public Jenkins (auto-signing) <releng@xamarin.com> 1575995726 -0500
+
+Tag mono-6.6.0.161 for stable branch
