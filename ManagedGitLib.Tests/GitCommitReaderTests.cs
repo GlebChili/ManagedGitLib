@@ -92,6 +92,27 @@ namespace ManagedGitLib.Tests
                 Assert.Equal(GitObjectId.Parse("e0b4d66ef7915417e04e88d5fa173185bb940029"), parents[0]);
                 Assert.Equal(GitObjectId.Parse("10e67ce38fbee44b3f5584d4f9df6de6c5f4cc5c"), parents[1]);
                 Assert.Equal(GitObjectId.Parse("a7fef320334121af85dce4b9b731f6c9a9127cfd"), parents[2]);
+
+                Assert.Equal(GitObjectId.Parse("0f118b0345501ba18c15e149c9ae49ce07352485"), commit.Tree);
+
+                GitSignature author = commit.Author;
+                GitSignature committer = commit.Committer;
+
+                Assert.Equal("Atsushi Eno", author.Name);
+                Assert.Equal("atsushieno@gmail.com", author.Email);
+                Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1278350964), author.Date);
+
+                Assert.Equal("Atsushi Eno", committer.Name);
+                Assert.Equal("atsushieno@gmail.com", committer.Email);
+                Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1278350964), committer.Date);
+
+                Stream expectedCommitMessageStream =
+                    TestUtilities.GetEmbeddedResource(@"commit-ab39e8acac105fa0db88514f259341c9f0201b22-message");
+                byte[] expectedCommitMessageBuffer = new byte[expectedCommitMessageStream.Length];
+                expectedCommitMessageStream.ReadAll(expectedCommitMessageBuffer);
+                string expectedCommitMessage = GitRepository.Encoding.GetString(expectedCommitMessageBuffer);
+
+                Assert.Equal(expectedCommitMessage, commit.Message);
             }
         }
     }
