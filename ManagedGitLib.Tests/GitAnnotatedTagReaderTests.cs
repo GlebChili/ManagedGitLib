@@ -22,6 +22,8 @@ namespace ManagedGitLib.Tests
             
             Assert.Equal(GitObjectId.Parse("bef1e6335812d32f8eab648c0228fc624b9f8357"), tag.Target);
 
+            Assert.True(tag.IsAnnotated);
+
             Assert.Equal("commit", tag.TargetType);
 
             Assert.Equal("mono-6.6.0.161", tag.Name);

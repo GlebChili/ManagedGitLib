@@ -99,6 +99,7 @@ namespace ManagedGitLib
             {
                 Sha = sha,
                 Target = targetObject,
+                IsAnnotated = true,
                 TargetType = type,
                 Name = tagName,
                 Tagger = tagger,
