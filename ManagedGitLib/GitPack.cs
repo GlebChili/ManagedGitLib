@@ -200,6 +200,10 @@ namespace ManagedGitLib
                     packObjectType = GitPackObjectType.OBJ_BLOB;
                     break;
 
+                case "tag":
+                    packObjectType = GitPackObjectType.OBJ_TAG;
+                    break;
+
                 default:
                     throw new GitException($"The object type '{objectType}' is not supported by the {nameof(GitPack)} class.");
             }

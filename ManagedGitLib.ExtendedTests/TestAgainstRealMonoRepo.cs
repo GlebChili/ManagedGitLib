@@ -209,5 +209,29 @@ namespace ManagedGitLib.ExtendedTests
 
             Assert.Equal(expectedNumber, CountCommits(repo));
         }
+
+        [Fact]
+        public void GetAnnotatedTag()
+        {
+            using GitRepository repo = GitRepository.Create(repoProvider.RepoDirectory.FullName)!;
+
+            GitTag tag = repo.GetAnnotatedTag(GitObjectId.Parse("b148bbd1583868db22eb52f06985bed671ca3d9a"));
+
+            Assert.Equal(GitObjectId.Parse("b148bbd1583868db22eb52f06985bed671ca3d9a"), tag.Sha);
+
+            Assert.Equal(GitObjectId.Parse("6bf3922f3fdf8587302a8f7b1b6cbb4fad78a42c"), tag.Target);
+
+            Assert.Equal("commit", tag.TargetType);
+
+            Assert.Equal("mono-5.8.1.0", tag.Name);
+
+            GitSignature tagger = tag.Tagger!.Value;
+
+            Assert.Equal("Xamarin Release Manager", tagger.Name);
+            Assert.Equal("builder@xamarin.com", tagger.Email);
+            Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1522083303), tagger.Date);
+
+            Assert.Equal(@"Mono - 5.8.1.0", tag.Message);
+        }
     }
 }

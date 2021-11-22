@@ -339,6 +339,27 @@ namespace ManagedGitLib
         }
 
         /// <summary>
+        /// Gets an annotated tag by its Git object Id.
+        /// </summary>
+        /// <param name="sha"></param>
+        /// <returns>
+        /// The requested tag.
+        /// </returns>
+        /// <exception cref="GitException"></exception>
+        public GitTag GetAnnotatedTag(GitObjectId sha)
+        {
+            using (Stream? stream = this.GetObjectBySha(sha, "tag"))
+            {
+                if (stream is null)
+                {
+                    throw new GitException($"The commit {sha} was not found in this repository.") { ErrorCode = GitException.ErrorCodes.ObjectNotFound };
+                }
+
+                return GitAnnotatedTagReader.Read(stream, sha);
+            }
+        }
+
+        /// <summary>
         /// Parses any committish to an object id.
         /// </summary>
         /// <param name="objectish">Any "objectish" string (e.g. commit ID (partial or full), branch name, tag name, or "HEAD").</param>
