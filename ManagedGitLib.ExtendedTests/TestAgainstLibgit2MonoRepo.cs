@@ -31,8 +31,17 @@ namespace ManagedGitLib.ExtendedTests
         {
             repo.Dispose();
 
-            repoDirectory.SetFilesAttributesToNormal();
-            repoDirectory.Delete(true);
+            // For some unknown issue, git pack files can't be deleted, when tests are running on GitHub Windows runners
+            if (OperatingSystem.IsWindows() && Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
+            {
+                Console.WriteLine($"{nameof(MonoRepoProvider)}: Tests are running on GitHub Windows runners. " +
+                                  $"Test repository cleanup won't be performed");
+            }
+            else
+            {
+                repoDirectory.SetFilesAttributesToNormal();
+                repoDirectory.Delete(true);
+            }
         }
     }
 
