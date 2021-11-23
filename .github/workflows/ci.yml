@@ -3,6 +3,8 @@ name: CI
 on:
   push:
   pull_request:
+  release:
+    types: [published]
 
 jobs:
   run-tests:
@@ -43,7 +45,11 @@ jobs:
     - name: Pack
       run: dotnet pack -c Release -o nupkgs
 
-    - name: Upload API nuget package to Azure DevOps
+    - name: Upload nuget package to Azure DevOps
       run: |
            dotnet nuget update source glebchili-personal-public --username CI --password ${{ secrets.AZURE_DEVOPS_PAT }} --store-password-in-clear-text
            dotnet nuget push nupkgs/**.nupkg --source glebchili-personal-public --api-key az --skip-duplicate
+
+    - name: Upload nuget package to NuGet.org
+      if: ${{ github.event_name == 'release' }}
+      run: dotnet nuget push nupkgs/**.nupkg --source nuget --api-key ${{ secrets.NUGET_ORG_PAT }} --skip-duplicate
