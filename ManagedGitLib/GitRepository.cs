@@ -915,7 +915,7 @@ namespace ManagedGitLib
 
             foreach (var file in files)
             {
-                GitObjectId sha = GitObjectId.Parse(File.ReadAllText(file.FullName, GitRepository.Encoding));
+                GitObjectId sha = GitObjectId.Parse(File.ReadAllText(file.FullName, GitRepository.Encoding).Substring(0, 40));
                 string tagName = file.FullName;
                 tagName = tagName.Substring(tagsDirectory.FullName.Length);
                 tagName = tagName.TrimStart(Path.DirectorySeparatorChar);

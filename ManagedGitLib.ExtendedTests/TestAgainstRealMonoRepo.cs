@@ -235,5 +235,37 @@ namespace ManagedGitLib.ExtendedTests
 
             Assert.Equal(@"Mono - 5.8.1.0", tag.Message);
         }
+
+        [Fact]
+        public void GetAllTags()
+        {
+            using GitRepository repo = GitRepository.Create(repoProvider.RepoDirectory.FullName)!;
+
+            var expectedTags = repoProvider.Repo.Tags;
+
+            var actualTags = repo.GetAllTags();
+
+            Assert.Equal(expectedTags.Count(), actualTags.Count);
+
+            foreach (var expectedTag in expectedTags)
+            {
+                Assert.Contains(actualTags, t => 
+                    t.Name == expectedTag.FriendlyName &&
+                    t.Target.ToString() == expectedTag.Target.Sha &&
+                    t.IsAnnotated == expectedTag.IsAnnotated);
+
+                if (expectedTag.IsAnnotated)
+                {
+                    Assert.Contains(actualTags, t =>
+                        t.IsAnnotated &&
+                        t.Name == expectedTag.FriendlyName &&
+                        t.Target.ToString() == expectedTag.Target.Sha &&
+                        t.Tagger!.Value.Name == expectedTag.Annotation.Tagger.Name &&
+                        t.Tagger!.Value.Email == expectedTag.Annotation.Tagger.Email &&
+                        t.Tagger!.Value.Date == expectedTag.Annotation.Tagger.When &&
+                        t.Message == expectedTag.Annotation.Message.TrimEnd('\n'));
+                }
+            }
+        }
     }
 }
