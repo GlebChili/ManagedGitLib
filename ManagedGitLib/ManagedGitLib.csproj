@@ -42,7 +42,6 @@
 
   <PropertyGroup>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
     <DebugType>Portable</DebugType>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\GmodNET.API.xml</DocumentationFile>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>
