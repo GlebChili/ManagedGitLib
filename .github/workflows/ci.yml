@@ -22,4 +22,26 @@ jobs:
       uses: actions/setup-dotnet@v1.8.2
       
     - name: Run Tests
-      run: dotnet test
+      run: dotnet test /p:IsTesting=true
+
+  deploy:
+    name: Deploy
+
+    runs-on: ubuntu-20.04
+
+    needs: run-tests
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1.8.2
+
+    - name: Pack
+      run: dotnet pack -c Release -o nupkgs
+
+    - name: Upload API nuget package to Azure DevOps
+      run: |
+           dotnet nuget update source glebchili-personal --username CI --password ${{ secrets.AZURE_DEVOPS_PAT }} --store-password-in-clear-text
+           dotnet nuget push nupkgs/**.nupkg --source glebchili-personal --api-key az --skip-duplicate
