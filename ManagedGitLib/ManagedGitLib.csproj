@@ -16,6 +16,7 @@
     <PackageProjectUrl>https://github.com/GlebChili/ManagedGitLib</PackageProjectUrl>
     <Copyright>Copyright (c) Gleb Krasilich</Copyright>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,5 +49,9 @@
       $(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb
     </AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 
 </Project>
