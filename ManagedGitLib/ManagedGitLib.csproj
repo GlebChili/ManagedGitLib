@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netcoreapp3.1;net6.0</TargetFrameworks>
@@ -7,14 +7,47 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>A lightweight read-only git library written entirely in .NET</Description>
+    <RepositoryUrl>https://github.com/GlebChili/ManagedGitLib</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageTags>git</PackageTags>
+    <PackageProjectUrl>https://github.com/GlebChili/ManagedGitLib</PackageProjectUrl>
+    <Copyright>Copyright (c) Gleb Krasilich</Copyright>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Nullable" Version="1.3.0" PrivateAssets="all" />
     <PackageReference Include="Validation" Version="2.5.5-beta" />
     <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.1.619-beta" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
+    <PackageReference Include="GmodNET.VersionTool.MSBuild" Version="2.0.0">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Memory" Version="4.5.4" />
   </ItemGroup>
+
+  <ItemGroup>
+    <VersionFile Include="../version.json" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <DebugType>Portable</DebugType>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\GmodNET.API.xml</DocumentationFile>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>
+      $(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb
+    </AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
 
 </Project>
