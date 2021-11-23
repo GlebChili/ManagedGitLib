@@ -1,4 +1,5 @@
 # ManagedGitLib
+[![NuGet link](https://img.shields.io/nuget/v/ManagedGitLib?logo=NuGet&style=for-the-badge)](https://www.nuget.org/packages/ManagedGitLib/)
 
 A lightweight read-only git library written entirely in .NET.
 ManagedGitLib targets .NET Standard 2.0 (among other frameworks) and, unkile [Libgit2Sharp](https://github.com/libgit2/libgit2sharp), does not depend on any native library.
