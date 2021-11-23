@@ -1,7 +1,7 @@
 # ManagedGitLib
 
 A lightweight read-only git library written entirely in .NET.
-ManagedGitLib targets .NET Standard 2.0 (among other frameworks) and, unkile [Libgit2Sharp](https://github.com/libgit2/libgit2sharp) does not depend on any native library.
+ManagedGitLib targets .NET Standard 2.0 (among other frameworks) and, unkile [Libgit2Sharp](https://github.com/libgit2/libgit2sharp), does not depend on any native library.
 Therefore ManagedGitLib can be used in scenarios where taking dependency on native libraries is imposible or problematic,
 like MSBuild Tasks and C# Source Generators.
 
