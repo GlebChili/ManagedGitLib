@@ -31,6 +31,8 @@ jobs:
 
     needs: run-tests
 
+    if: ${{ github.event_name != 'pull_request' && github.repository_owner == 'GlebChili' }}
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -43,5 +45,5 @@ jobs:
 
     - name: Upload API nuget package to Azure DevOps
       run: |
-           dotnet nuget update source glebchili-personal --username CI --password ${{ secrets.AZURE_DEVOPS_PAT }} --store-password-in-clear-text
-           dotnet nuget push nupkgs/**.nupkg --source glebchili-personal --api-key az --skip-duplicate
+           dotnet nuget update source glebchili-personal-public --username CI --password ${{ secrets.AZURE_DEVOPS_PAT }} --store-password-in-clear-text
+           dotnet nuget push nupkgs/**.nupkg --source glebchili-personal-public --api-key az --skip-duplicate
