@@ -857,5 +857,104 @@ namespace ManagedGitLib
 
             return values;
         }
+
+        /// <summary>
+        /// Gets all tags (both lightweight and annotated) of the repository.
+        /// </summary>
+        /// <returns>The list of all repository tags.</returns>
+        public List<GitTag> GetAllTags()
+        {
+            List<GitTag> listOfTags = new List<GitTag>();
+
+            var tags = GetTagsByPath();
+            var packedTags = GetTagsFromPackedRefs();
+
+            GitTag ProcessTag(string tagName, GitObjectId sha)
+            {
+                try
+                {
+                    this.GetCommit(sha);
+
+                    return new GitTag
+                    {
+                        IsAnnotated = false,
+                        Name = tagName,
+                        Target = sha
+                    };
+                }
+                catch (GitException e)
+                {
+                    return this.GetAnnotatedTag(sha);
+                }
+            }
+
+            var allTags = tags.Concat(packedTags);
+
+            foreach (var pair in allTags)
+            {
+                GitTag tag = ProcessTag(pair.Key, pair.Value);
+
+                listOfTags.Add(tag);
+            }
+
+            return listOfTags;
+        }
+
+        Dictionary<string, GitObjectId> GetTagsByPath()
+        {
+            Dictionary<string, GitObjectId> dict = new Dictionary<string, GitObjectId>();
+
+            DirectoryInfo tagsDirectory = new DirectoryInfo(Path.Combine(this.CommonDirectory, "refs/tags/"));
+
+            if (!tagsDirectory.Exists)
+            {
+                return dict;
+            }
+
+            FileInfo[] files = tagsDirectory.GetFiles("*", SearchOption.AllDirectories);
+
+            foreach (var file in files)
+            {
+                GitObjectId sha = GitObjectId.Parse(File.ReadAllText(file.FullName, GitRepository.Encoding));
+                string tagName = file.FullName;
+                tagName = tagName.Substring(tagsDirectory.FullName.Length);
+                tagName = tagName.TrimStart(Path.DirectorySeparatorChar);
+                tagName = tagName.Replace(Path.DirectorySeparatorChar, '/');
+
+                dict.Add(tagName, sha);
+            }
+
+            return dict;
+        }
+
+        Dictionary<string, GitObjectId> GetTagsFromPackedRefs()
+        {
+            Dictionary<string, GitObjectId> dict = new Dictionary<string, GitObjectId>();
+
+            FileInfo packedRefsFiles = new FileInfo(Path.Combine(this.CommonDirectory, "packed-refs"));
+
+            if (!packedRefsFiles.Exists)
+            {
+                return dict;
+            }
+
+            string[] lines = File.ReadAllLines(packedRefsFiles.FullName, GitRepository.Encoding);
+
+            foreach (var line in lines)
+            {
+                if (line.Length > 51 && line.Substring(40).StartsWith(" refs/tags/"))
+                {
+                    string[] splittedLine = line.Split(' ');
+
+                    GitObjectId sha = GitObjectId.Parse(splittedLine[0]);
+
+                    string tagName = splittedLine[1].Substring(10);
+
+                    dict.Add(tagName, sha);
+                }
+            }
+
+            return dict;
+        }
     }
 }
