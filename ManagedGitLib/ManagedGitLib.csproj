@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <VersionFile Include="../version.json" />
+    <VersionFile Include="../Metadata/version.json" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
