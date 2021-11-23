@@ -1,3 +1,12 @@
+###############################################################################
+# Set default behavior to automatically normalize line endings.
+###############################################################################
+* text=auto
+
+# Ensure shell scripts use LF line endings (linux only accepts LF)
+*.sh eol=lf
+*.ps1 eol=lf
+
 ManagedGitLib.ExtendedTests/commit* binary
 ManagedGitLib.Tests/commit-ab39e8acac105fa0db88514f259341c9f0201b22 binary
 ManagedGitLib.Tests/commit-ab39e8acac105fa0db88514f259341c9f0201b22-message binary
