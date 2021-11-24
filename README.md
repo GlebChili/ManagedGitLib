@@ -10,7 +10,9 @@ ManagedGitLib is a read-only library and designed to be used for reading git met
 It can't be used for cloning, managing, and modifying git repositories.
 For a full-blown git experience check out [Libgit2Sharp](https://github.com/libgit2/libgit2sharp).
 
-ManagedGitLib is derived from [Nerdbank.GitVersioning](https://github.com/dotnet/Nerdbank.GitVersioning) `ManagedGit` implementation.
+ManagedGitLib is derived from [Nerdbank.GitVersioning](https://github.com/dotnet/Nerdbank.GitVersioning) `ManagedGit` implementation. Special thanks to people, who made original `ManagedGit` possible:
+1. [Frederik Carlier](https://github.com/qmfrederik)
+2. [Filip Navara](https://github.com/filipnavara)
 
 ## Nightly builds
 
