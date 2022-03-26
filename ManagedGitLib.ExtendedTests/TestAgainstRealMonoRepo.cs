@@ -115,7 +115,7 @@ namespace ManagedGitLib.ExtendedTests
 
             string expectedCommitMessage = "Bump bockbuild for Pango patch\n\n" +
                                            "Fixes bug #1048838, correct SF font not loading in VSMac\n\n" +
-                                           "Backport of https://github.com/mono/mono/pull/18566";
+                                           "Backport of https://github.com/mono/mono/pull/18566\n";
 
             Assert.Equal(expectedCommitMessage, testCommit.Message);
 

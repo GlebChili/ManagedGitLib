@@ -301,7 +301,7 @@ namespace ManagedGitLib
 
             buffer = buffer.Slice(MessageStart.Length);
 
-            message = GitRepository.Encoding.GetString(buffer.ToArray()).TrimEnd('\n');
+            message = GitRepository.Encoding.GetString(buffer.ToArray());
 
             return true;
         }

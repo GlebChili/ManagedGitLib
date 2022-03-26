@@ -36,7 +36,7 @@ namespace ManagedGitLib.Tests
                 Assert.Equal(new DateTimeOffset(2020, 10, 6, 13, 40, 09, TimeSpan.FromHours(-6)), author.Date);
                 Assert.Equal("andrewarnott@gmail.com", committer.Email);
 
-                Assert.Equal("Merge branch 'v3.3'", commit.Message);
+                Assert.Equal("Merge branch 'v3.3'\n", commit.Message);
             }
         }
 
