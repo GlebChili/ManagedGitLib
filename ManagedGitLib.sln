@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NerdBank.GitVersioning", "N
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedGitLib.ExtendedTests", "ManagedGitLib.ExtendedTests\ManagedGitLib.ExtendedTests.csproj", "{72AC2D60-43F6-4B71-BCD0-5E40A72C805C}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ManagedGitLib.Parsers", "ManagedGitLib.Parsers\ManagedGitLib.Parsers.fsproj", "{55523D57-C2CC-40FF-A73E-DE59A66263BB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{72AC2D60-43F6-4B71-BCD0-5E40A72C805C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72AC2D60-43F6-4B71-BCD0-5E40A72C805C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72AC2D60-43F6-4B71-BCD0-5E40A72C805C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55523D57-C2CC-40FF-A73E-DE59A66263BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55523D57-C2CC-40FF-A73E-DE59A66263BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55523D57-C2CC-40FF-A73E-DE59A66263BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55523D57-C2CC-40FF-A73E-DE59A66263BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
