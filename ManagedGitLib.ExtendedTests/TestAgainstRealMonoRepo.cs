@@ -152,7 +152,7 @@ namespace ManagedGitLib.ExtendedTests
             Stream commitMessageStream = TestUtils.GetEmbeddedResource("commit2-message");
             byte[] commitMessageBuffer = new byte[commitMessageStream.Length];
             commitMessageStream.ReadAll(commitMessageBuffer);
-            string expectedCommitMessage = GitRepository.Encoding.GetString(commitMessageBuffer);
+            string expectedCommitMessage = GitRepository.Encoding.GetString(commitMessageBuffer).Replace("\r\n", "\n");
 
             Assert.Equal(expectedCommitMessage, testCommit.Message);
 

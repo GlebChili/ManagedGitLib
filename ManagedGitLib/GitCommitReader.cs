@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using ManagedGitLib.Parsers;
 
 namespace ManagedGitLib
 {
@@ -71,239 +72,82 @@ namespace ManagedGitLib
         /// </returns>
         public static GitCommit Read(ReadOnlySpan<byte> commit, GitObjectId sha)
         {
-            var buffer = commit;
+            string commitWorkload = GitRepository.GetString(commit);
 
-            var tree = ReadTree(buffer.Slice(0, TreeLineLength));
+            ParsedCommit parsedCommit = Parsers.Parsers.ParseCommitt(commitWorkload);
 
-            buffer = buffer.Slice(TreeLineLength);
+            GitObjectId tree = GitObjectId.Parse(parsedCommit.tree.hash);
 
-            GitObjectId? firstParent = null, secondParent = null;
+            GitObjectId? firstParent = null;
+            GitObjectId? secondParent = null;
             List<GitObjectId>? additionalParents = null;
-            List<GitObjectId> parents = new List<GitObjectId>();
-            while (TryReadParent(buffer, out GitObjectId parent))
+
+            if (parsedCommit.parents.Length != 0)
             {
-                if (!firstParent.HasValue)
+                firstParent = GitObjectId.Parse(parsedCommit.parents[0].hash);
+            }
+
+            if (parsedCommit.parents.Length > 1)
+            {
+                secondParent = GitObjectId.Parse(parsedCommit.parents[1].hash);
+            }
+
+            if (parsedCommit.parents.Length > 2)
+            {
+                var tmp = parsedCommit.parents.Skip(2);
+
+                additionalParents = new List<GitObjectId>();
+
+                foreach (var p in tmp)
                 {
-                    firstParent = parent;
+                    additionalParents.Add(GitObjectId.Parse(p.hash));
                 }
-                else if (!secondParent.HasValue)
+            }
+
+            GitSignature author = new GitSignature
+            {
+                Name = parsedCommit.author.name,
+                Email = parsedCommit.author.email,
+                Date = DateTimeOffset.FromUnixTimeSeconds(parsedCommit.author.date)
+            };
+
+            GitSignature committer = new GitSignature
+            {
+                Name = parsedCommit.committer.name,
+                Email = parsedCommit.committer.email,
+                Date = DateTimeOffset.FromUnixTimeSeconds(parsedCommit.committer.date)
+            };
+
+            List<GitAdditionalHeader>? additionalHeaders = null;
+
+            if (parsedCommit.additionalHeaders.Length != 0)
+            {
+                additionalHeaders = new List<GitAdditionalHeader>();
+
+                foreach (var h in parsedCommit.additionalHeaders)
                 {
-                    secondParent = parent;
+                    additionalHeaders.Add(new GitAdditionalHeader
+                    {
+                        Key = h.name,
+                        Value = h.value
+                    });
                 }
-                else
-                {
-                    additionalParents ??= new List<GitObjectId>();
-                    additionalParents.Add(parent);
-                }
-
-                buffer = buffer.Slice(ParentLineLength);
             }
 
-            GitSignature authorSignature = default;
+            string message = parsedCommit.message;
 
-            if (!TryReadAuthor(buffer, out authorSignature, out int authorLineLength))
+            return new GitCommit
             {
-                throw new GitException("Unable to read commit author");
-            }
-
-            buffer = buffer.Slice(authorLineLength);
-
-            GitSignature commiterSignature = default;
-
-            if (!TryReadCommitter(buffer, out commiterSignature, out int committerLineLength))
-            {
-                throw new GitException("Unable to read commit committer");
-            }
-
-            buffer = buffer.Slice(committerLineLength);
-
-            while (TryReadAdditionalHeaders(buffer, out int additionalHeaderLength))
-            {
-                buffer = buffer.Slice(additionalHeaderLength);
-            }
-
-            string message = "";
-
-            if (!TryReadMessage(buffer, out message))
-            {
-                throw new GitException("Unable to read commit message");
-            }
-
-            return new GitCommit()
-            {
+                Tree = tree,
                 Sha = sha,
                 FirstParent = firstParent,
                 SecondParent = secondParent,
                 AdditionalParents = additionalParents,
-                Tree = tree,
-                Author = authorSignature,
-                Committer = commiterSignature,
+                Author = author,
+                Committer = committer,
+                AdditionalHeaders = additionalHeaders,
                 Message = message
             };
-        }
-
-        private static GitObjectId ReadTree(ReadOnlySpan<byte> line)
-        {
-            // Format: tree d8329fc1cc938780ffdd9f94e0d364e0ea74f579\n
-            // 47 bytes: 
-            //  tree: 5 bytes
-            //  space: 1 byte
-            //  hash: 40 bytes
-            //  \n: 1 byte
-            bool hasCorrectPrefix = line.Slice(0, TreeStart.Length).SequenceEqual(TreeStart);
-            bool hasCorrectLength = line[TreeLineLength - 1] == (byte)'\n';
-
-            if (!(hasCorrectLength && hasCorrectPrefix))
-            {
-                throw new Exception("Unable to read commit tree");
-            }
-
-            return GitObjectId.ParseHex(line.Slice(TreeStart.Length, 40));
-        }
-
-        private static bool TryReadParent(ReadOnlySpan<byte> line, out GitObjectId parent)
-        {
-            // Format: "parent ef079ebcca375f6fd54aa0cb9f35e3ecc2bb66e7\n"
-            parent = GitObjectId.Empty;
-
-            if (!line.Slice(0, ParentStart.Length).SequenceEqual(ParentStart))
-            {
-                return false;
-            }
-
-            if (line[ParentLineLength - 1] != (byte)'\n')
-            {
-                return false;
-            }
-
-            parent = GitObjectId.ParseHex(line.Slice(ParentStart.Length, 40));
-            return true;
-        }
-
-        private static bool TryReadAuthor(ReadOnlySpan<byte> line, out GitSignature signature, out int lineLength)
-        {
-            signature = default;
-            lineLength = 0;
-
-            if (!line.Slice(0, AuthorStart.Length).SequenceEqual(AuthorStart))
-            {
-                return false;
-            }
-
-            line = line.Slice(AuthorStart.Length);
-
-            int emailStart = line.IndexOf((byte)'<');
-            int emailEnd = line.IndexOf((byte)'>');
-            int lineEnd = line.IndexOf((byte)'\n');
-
-            lineLength = AuthorStart.Length + lineEnd + 1;
-
-            var name = line.Slice(0, emailStart - 1);
-            var email = line.Slice(emailStart + 1, emailEnd - emailStart - 1);
-            var time = line.Slice(emailEnd + 2, lineEnd - emailEnd - 2);
-
-            if (name.Length != 0)
-            {
-                signature.Name = GitRepository.GetString(name);
-            }
-            else
-            {
-                signature.Name = "";
-            }
-
-            if (email.Length != 0)
-            {
-                signature.Email = GitRepository.GetString(email);
-            }
-            else
-            {
-                signature.Email = "";
-            }
-
-            var offsetStart = time.IndexOf((byte)' ');
-            var ticks = long.Parse(GitRepository.GetString(time.Slice(0, offsetStart)));
-            signature.Date = DateTimeOffset.FromUnixTimeSeconds(ticks);
-
-            return true;
-        }
-
-        private static bool TryReadCommitter(ReadOnlySpan<byte> line, out GitSignature signature, out int lineLength)
-        {
-            signature = default;
-            lineLength = 0;
-
-            if (!line.Slice(0, CommitterStart.Length).SequenceEqual(CommitterStart))
-            {
-                return false;
-            }
-
-            line = line.Slice(CommitterStart.Length);
-
-            int emailStart = line.IndexOf((byte)'<');
-            int emailEnd = line.IndexOf((byte)'>');
-            var lineEnd = line.IndexOf((byte)'\n');
-
-            lineLength = CommitterStart.Length + lineEnd + 1;
-
-            var name = line.Slice(0, emailStart - 1);
-            var email = line.Slice(emailStart + 1, emailEnd - emailStart - 1);
-            var time = line.Slice(emailEnd + 2, lineEnd - emailEnd - 2);
-
-            if (name.Length != 0)
-            {
-                signature.Name = GitRepository.GetString(name);
-            }
-            else
-            {
-                signature.Name = "";
-            }
-
-            if (email.Length != 0)
-            {
-                signature.Email = GitRepository.GetString(email);
-            }
-            else
-            {
-                signature.Email = "";
-            }
-
-            var offsetStart = time.IndexOf((byte)' ');
-            var ticks = long.Parse(GitRepository.GetString(time.Slice(0, offsetStart)));
-            signature.Date = DateTimeOffset.FromUnixTimeSeconds(ticks);
-
-            return true;
-        }
-
-        private static bool TryReadAdditionalHeaders(ReadOnlySpan<byte> buffer, out int additionalHeaderLength)
-        {
-            additionalHeaderLength = 0;
-
-            if (buffer.Slice(0, MessageStart.Length).SequenceEqual(MessageStart))
-            {
-                return false;
-            }
-
-            var lineEnd = buffer.IndexOf((byte)'\n');
-
-            additionalHeaderLength = lineEnd + 1;
-
-            return true;
-        }
-
-        private static bool TryReadMessage(ReadOnlySpan<byte> buffer, out string message)
-        {
-            message = "";
-
-            if (!buffer.Slice(0, MessageStart.Length).SequenceEqual(MessageStart))
-            {
-                return false;
-            }
-
-            buffer = buffer.Slice(MessageStart.Length);
-
-            message = GitRepository.Encoding.GetString(buffer.ToArray());
-
-            return true;
         }
     }
 }

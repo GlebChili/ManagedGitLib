@@ -17,10 +17,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Library.fs" />
+    <Compile Include="CommitParsers.fs" />
+    <Compile Include="Parsers.fs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FParsec" Version="1.1.1" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <PackageReference Include="GmodNET.VersionTool.MSBuild" Version="2.1.0">
       <PrivateAssets>all</PrivateAssets>
