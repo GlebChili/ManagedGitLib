@@ -40,8 +40,8 @@ module private CommitParsers =
 
     let additionalHeaderParser: Parser<AdditionalHeader, unit> =
         many1Chars (digit <|> letter <|> pchar '-' <|> pchar '_') >>=
-            fun header_name -> additionalHeaderValueParser >>=
-                fun header_value -> preturn { name = header_name; value = header_value }
+            fun header_name -> additionalHeaderValueParser >>= fun header_value ->
+                preturn { name = header_name; value = header_value }
 
     let allAdditionalHeadersParser: Parser<AdditionalHeader list, unit> =
         many additionalHeaderParser
