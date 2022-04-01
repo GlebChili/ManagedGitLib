@@ -267,5 +267,38 @@ namespace ManagedGitLib.ExtendedTests
                 }
             }
         }
+
+        [Fact]
+        public void TestAgainstAllCommits()
+        {
+            using GitRepository repo = GitRepository.Create(repoProvider.RepoDirectory.FullName)!;
+
+            var allCommits = repoProvider.Repo.Commits;
+
+            foreach (var testCommit in allCommits)
+            {
+                GitCommit current = repo.GetCommit(GitObjectId.Parse(testCommit.Sha));
+
+                Assert.Equal(testCommit.Tree.Sha, current.Tree.ToString());
+
+                foreach (var testParent in testCommit.Parents)
+                {
+                    Assert.Contains(current.Parents, x => x.ToString() == testParent.Sha);
+                }
+
+                Assert.Equal(testCommit.Author.Name, current.Author.Name);
+                Assert.Equal(testCommit.Author.Email, current.Author.Email);
+                Assert.Equal(testCommit.Author.When, current.Author.Date);
+
+                Assert.Equal(testCommit.Committer.Name, current.Committer.Name);
+                Assert.Equal(testCommit.Committer.Email, current.Committer.Email);
+                Assert.Equal(testCommit.Committer.When, current.Committer.Date);
+
+                // LibGit2Sharp is bad at handling CR LF line ending.
+                // Our current parser is actually much smarter, so we need to controll for it.
+                Assert.Equal(testCommit.Message.Replace("\r\n", "\n").Replace("\r", "\n")
+                    .TrimStart(new char[] { '\n' }), current.Message);
+            }
+        }
     }
 }

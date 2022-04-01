@@ -18,7 +18,9 @@ type ParsedCommit = { tree: TreeHeader
 module private CommitParsers =
     let authorCommiterDataReader: Parser<string * string * int64, unit> =
         parse { let! nameRaw = (manyCharsTill anyChar (pstring "<"))
-                let name = nameRaw.TrimEnd(List.toArray [' '])
+                // LibGit2Sharp do some weird name post processing by trimming some characters.
+                // In order to comply with LibGit2Sharp, we are trying to mimiс such behaviour here.
+                let name = nameRaw.Trim(List.toArray [' '; '"'; '.'])
                 let! email = manyCharsTill anyChar (pchar '>')
                 do! spaces
                 let! date = pint64
@@ -66,7 +68,7 @@ module private CommitParsers =
         many parentParser
 
     let messageParser: Parser<string, unit> =
-        newline >>. manyChars anyChar
+        (many1 newline) >>. manyChars anyChar
 
     let committParser: Parser<ParsedCommit, unit> =
         parse { let! tree = treeParser
