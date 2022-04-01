@@ -300,5 +300,18 @@ namespace ManagedGitLib.ExtendedTests
                     .TrimStart(new char[] { '\n' }), current.Message);
             }
         }
+
+        [Fact]
+        public void ReadAdditionalHeaderFromRealCommit()
+        {
+            using GitRepository repo = GitRepository.Create(repoProvider.RepoDirectory.FullName)!;
+
+            var commitToTest = repo.GetCommit(GitObjectId.Parse("4c0b47d580c39a9d70d5df9e399f4957bcfef918"));
+
+            Assert.Single(commitToTest.AdditionalHeaders);
+
+            Assert.Equal("HG:rename-source", commitToTest.AdditionalHeaders[0].Key);
+            Assert.Equal("hg", commitToTest.AdditionalHeaders[0].Value);
+        }
     }
 }

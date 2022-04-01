@@ -41,7 +41,7 @@ module private CommitParsers =
         innerValueParser ""
 
     let additionalHeaderParser: Parser<AdditionalHeader, unit> =
-        many1Chars (digit <|> letter <|> pchar '-' <|> pchar '_') .>> spaces >>=
+        (many1Chars (digit <|> letter <|> anyOf "_-.,:;!?@#$%^&*()[]")) .>> spaces >>=
             fun header_name -> additionalHeaderValueParser >>= fun header_value ->
                 preturn { name = header_name; value = header_value }
 
