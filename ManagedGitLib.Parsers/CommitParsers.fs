@@ -2,17 +2,17 @@
 
 open FParsec
 
-type AuthorHeader = { name: string; email: string; date: int64 }
-type CommitterHeader = { name: string; email: string; date: int64 }
-type TreeHeader = { hash: string }
-type ParentHeader = { hash: string }
-type AdditionalHeader = { name: string; value: string }
+type CommitAuthorHeader = { name: string; email: string; date: int64 }
+type CommitCommitterHeader = { name: string; email: string; date: int64 }
+type CommitTreeHeader = { hash: string }
+type CommitParentHeader = { hash: string }
+type CommitAdditionalHeader = { name: string; value: string }
 
-type ParsedCommit = { tree: TreeHeader
-                      parents: ParentHeader array
-                      author: AuthorHeader
-                      committer: CommitterHeader
-                      additionalHeaders: AdditionalHeader array
+type ParsedCommit = { tree: CommitTreeHeader
+                      parents: CommitParentHeader array
+                      author: CommitAuthorHeader
+                      committer: CommitCommitterHeader
+                      additionalHeaders: CommitAdditionalHeader array
                       message: string }
 
 module private CommitParsers =
@@ -40,31 +40,31 @@ module private CommitParsers =
                 fun line -> ((pchar ' ' >>. innerValueParser (acc + line + "\n")) <|> preturn (acc + line))
         innerValueParser ""
 
-    let additionalHeaderParser: Parser<AdditionalHeader, unit> =
+    let additionalHeaderParser: Parser<CommitAdditionalHeader, unit> =
         (many1Chars (digit <|> letter <|> anyOf "_-.,:;!?@#$%^&*()[]")) .>> spaces >>=
             fun header_name -> additionalHeaderValueParser >>= fun header_value ->
                 preturn { name = header_name; value = header_value }
 
-    let allAdditionalHeadersParser: Parser<AdditionalHeader list, unit> =
+    let allAdditionalHeadersParser: Parser<CommitAdditionalHeader list, unit> =
         many additionalHeaderParser
 
-    let authorParser: Parser<AuthorHeader, unit> =
+    let authorParser: Parser<CommitAuthorHeader, unit> =
         pstring "author" >>. spaces >>. authorCommiterDataReader >>= fun (name, email, date) ->
             preturn  {name = name; email = email; date = date}
 
-    let committerParser: Parser<CommitterHeader, unit> =
+    let committerParser: Parser<CommitCommitterHeader, unit> =
         pstring "committer" >>. spaces >>. authorCommiterDataReader >>= fun (name, email, date) ->
             preturn {name = name; email = email; date = date}
 
-    let treeParser: Parser<TreeHeader, unit> =
+    let treeParser: Parser<CommitTreeHeader, unit> =
         pstring "tree" >>. spaces >>. hashParser .>> newline >>=
             fun hash -> preturn {hash = hash}
 
-    let parentParser: Parser<ParentHeader, unit> =
+    let parentParser: Parser<CommitParentHeader, unit> =
         pstring "parent" >>. spaces >>. hashParser .>> newline >>=
             fun hash -> preturn {hash = hash}
 
-    let allParentsParser: Parser<ParentHeader list, unit> =
+    let allParentsParser: Parser<CommitParentHeader list, unit> =
         many parentParser
 
     let messageParser: Parser<string, unit> =
