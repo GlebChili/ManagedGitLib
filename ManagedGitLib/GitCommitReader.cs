@@ -15,15 +15,6 @@ namespace ManagedGitLib
     /// </summary>
     public static class GitCommitReader
     {
-        private static readonly byte[] TreeStart = GitRepository.Encoding.GetBytes("tree ");
-        private static readonly byte[] ParentStart = GitRepository.Encoding.GetBytes("parent ");
-        private static readonly byte[] AuthorStart = GitRepository.Encoding.GetBytes("author ");
-        private static readonly byte[] CommitterStart = GitRepository.Encoding.GetBytes("committer ");
-        private static readonly byte[] MessageStart = GitRepository.Encoding.GetBytes("\n");
-
-        private const int TreeLineLength = 46;
-        private const int ParentLineLength = 48;
-
         /// <summary>
         /// Reads a <see cref="GitCommit"/> object from a <see cref="Stream"/>.
         /// </summary>

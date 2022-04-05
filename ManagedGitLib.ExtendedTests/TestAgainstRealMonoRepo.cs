@@ -263,7 +263,7 @@ namespace ManagedGitLib.ExtendedTests
                         t.Tagger!.Value.Name == expectedTag.Annotation.Tagger.Name &&
                         t.Tagger!.Value.Email == expectedTag.Annotation.Tagger.Email &&
                         t.Tagger!.Value.Date == expectedTag.Annotation.Tagger.When &&
-                        t.Message == expectedTag.Annotation.Message.TrimEnd('\n'));
+                        t.Message == expectedTag.Annotation.Message);
                 }
             }
         }

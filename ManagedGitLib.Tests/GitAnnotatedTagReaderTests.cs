@@ -36,7 +36,7 @@ namespace ManagedGitLib.Tests
             Assert.Equal("releng@xamarin.com", tagger!.Value.Email);
             Assert.Equal(DateTimeOffset.FromUnixTimeSeconds(1575995726), tagger!.Value.Date);
 
-            Assert.Equal("Tag mono-6.6.0.161 for stable branch", tag.Message);
+            Assert.Equal("Tag mono-6.6.0.161 for stable branch\n", tag.Message);
         }
     }
 }

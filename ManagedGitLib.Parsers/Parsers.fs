@@ -10,3 +10,9 @@ module Parsers =
         match parsingResult with
         | Success (r, _, _) -> r
         | Failure (m, _, _) -> raise (CommitParsingException $"Unable to parse commit object. Parsing error: {m}")
+
+    let ParseTag tagText =
+        let parsingResult = run TagParsers.tagParser tagText
+        match parsingResult with
+        | Success (r, _, _) -> r
+        | Failure (m, _, _) -> raise (CommitParsingException $"Unable to parse commit object. Parsing error: {m}")
