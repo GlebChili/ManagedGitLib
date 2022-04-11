@@ -42,6 +42,11 @@ namespace ManagedGitLib
         public GitSignature? Tagger { get; set; }
 
         /// <summary>
+        /// Gets or sets additional, optional headers of this annotated tag, if any
+        /// </summary>
+        public List<GitAdditionalHeader>? AdditionalHeaders { get; set; }
+
+        /// <summary>
         /// Gets otr sets the message of the annotated tag.
         /// </summary>
         public string? Message { get; set; }

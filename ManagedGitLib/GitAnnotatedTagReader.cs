@@ -80,6 +80,22 @@ namespace ManagedGitLib
                 Date = DateTimeOffset.FromUnixTimeSeconds(parseResult.tagger.date)
             };
 
+            List<GitAdditionalHeader>? additionalHeaders = null;
+
+            if (parseResult.additionalHeaders.Length != 0)
+            {
+                additionalHeaders = new List<GitAdditionalHeader>();
+
+                foreach (var h in parseResult.additionalHeaders)
+                {
+                    additionalHeaders.Add(new GitAdditionalHeader
+                    {
+                        Key = h.name,
+                        Value = h.value
+                    });
+                }
+            }
+
             string message = parseResult.message;
 
             return new GitTag
@@ -90,6 +106,7 @@ namespace ManagedGitLib
                 TargetType = type,
                 Name = tagName,
                 Tagger = tagger,
+                AdditionalHeaders = additionalHeaders,
                 Message = message
             };
         }
