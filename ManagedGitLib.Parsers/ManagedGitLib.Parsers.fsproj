@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="5.0.0" />
     <PackageReference Include="FParsec" Version="1.1.1" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <PackageReference Include="GmodNET.VersionTool.MSBuild" Version="2.1.0">
