@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using Xunit;
 using Xunit.Abstractions;
@@ -166,40 +166,6 @@ namespace ManagedGitLib.ExtendedTests
             Assert.Single(testCommit.Parents);
         }
 
-        static int CountCommits(GitRepository repo)
-        {
-            int counter = 0;
-            Queue<GitCommit> queue = new Queue<GitCommit>();
-            HashSet<GitObjectId> setOfCommitIds = new HashSet<GitObjectId>();
-
-            GitCommit? headCommit = repo.GetHeadCommit();
-
-            if (headCommit is not null)
-            {
-                queue.Enqueue(headCommit.Value);
-            }
-
-            while (queue.Count != 0)
-            {
-                GitCommit commit = queue.Dequeue();
-
-                counter++;
-
-                setOfCommitIds.Add(commit.Sha);
-
-                foreach (GitObjectId parentId in commit.Parents)
-                {
-                    if (!setOfCommitIds.Contains(parentId))
-                    {
-                        setOfCommitIds.Add(parentId);
-                        queue.Enqueue(repo.GetCommit(parentId));
-                    }
-                }
-            }
-
-            return counter;
-        }
-
         [Fact]
         public void CountCommitsFromHead()
         {
@@ -207,7 +173,9 @@ namespace ManagedGitLib.ExtendedTests
 
             int expectedNumber = repoProvider.Repo.Commits.Count();
 
-            Assert.Equal(expectedNumber, CountCommits(repo));
+            int actualNumber = repo.GetAllCommits().Count();
+
+            Assert.Equal(expectedNumber, actualNumber);
         }
 
         [Fact]

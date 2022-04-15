@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -900,6 +901,17 @@ namespace ManagedGitLib
             return listOfTags;
         }
 
+        /// <summary>
+        /// Gets an enumerable collection of all commits reachable from the repositorie's current HEAD.
+        /// </summary>
+        /// <returns>
+        /// An enumerable collection of all commits reachable from the repositorie's current HEAD.
+        /// </returns>
+        public IEnumerable<GitCommit> GetAllCommits()
+        {
+            return new CommitEnumerator(this);
+        }
+
         Dictionary<string, GitObjectId> GetTagsByPath()
         {
             Dictionary<string, GitObjectId> dict = new Dictionary<string, GitObjectId>();
@@ -956,5 +968,75 @@ namespace ManagedGitLib
 
             return dict;
         }
+    }
+
+    class CommitEnumerator : IEnumerable<GitCommit>, IEnumerator<GitCommit>
+    {
+        GitRepository repo;
+
+        GitCommit current;
+
+        Queue<GitCommit> commitQueue;
+
+        HashSet<string> prevHashes;
+
+        public CommitEnumerator(GitRepository repo)
+        {
+            this.repo = repo;
+
+            current = default;
+
+            commitQueue = new Queue<GitCommit>();
+            prevHashes = new HashSet<string>();
+
+            var tipCommit = repo.GetHeadCommit();
+
+            if (tipCommit is not null)
+            {
+                commitQueue.Enqueue(tipCommit.Value);
+            }
+        }
+
+        public GitCommit Current => this.current;
+
+        object IEnumerator.Current => this.Current;
+
+        public IEnumerator<GitCommit> GetEnumerator()
+        {
+            return this;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return this;
+        }
+
+        public bool MoveNext()
+        {
+            if (commitQueue.Any())
+            {
+                current = commitQueue.Dequeue();
+
+                foreach (var parentCommit in current.Parents)
+                {
+                    if (!prevHashes.Contains(parentCommit.ToString()))
+                    {
+                        prevHashes.Add(parentCommit.ToString());
+
+                        commitQueue.Enqueue(repo.GetCommit(parentCommit));
+                    }
+                }
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public void Reset() => throw new NotSupportedException();
+
+        public void Dispose() { }
     }
 }
