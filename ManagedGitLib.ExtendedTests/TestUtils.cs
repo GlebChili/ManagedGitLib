@@ -16,7 +16,7 @@ namespace ManagedGitLib.ExtendedTests
             Requires.NotNullOrEmpty(resourcePath, nameof(resourcePath));
 
             return Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream($"ManagedGitLib.ExtendedTests.{resourcePath.Replace('\\', '.')}");
+                .GetManifestResourceStream($"ManagedGitLib.ExtendedTests.{resourcePath.Replace('\\', '.')}")!;
         }
     }
 

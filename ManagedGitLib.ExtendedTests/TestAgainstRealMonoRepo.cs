@@ -19,7 +19,7 @@ namespace ManagedGitLib.ExtendedTests
 
         public MonoRepoProvider()
         {
-            repoDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString()));
+            repoDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), $"ManagedGitLib-Tests-{Guid.NewGuid().ToString()}"));
 
             using Process gitProcess = new Process();
             gitProcess.StartInfo.WorkingDirectory = repoDirectory.FullName;
