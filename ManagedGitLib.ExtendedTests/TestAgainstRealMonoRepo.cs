@@ -179,6 +179,23 @@ namespace ManagedGitLib.ExtendedTests
         }
 
         [Fact]
+        public void CheckCommitEnumeration()
+        {
+            using GitRepository repo = GitRepository.Create(repoProvider.RepoDirectory.FullName)!;
+
+            HashSet<string> actualHashes = new HashSet<string>();
+
+            int expectedNumber = repoProvider.Repo.Commits.Count();
+
+            foreach (var commit in repo.GetAllCommits())
+            {
+                actualHashes.Add(commit.Sha.ToString());
+            }
+
+            Assert.Equal(expectedNumber, actualHashes.Count());
+        }
+
+        [Fact]
         public void GetAnnotatedTag()
         {
             using GitRepository repo = GitRepository.Create(repoProvider.RepoDirectory.FullName)!;
