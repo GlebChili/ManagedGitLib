@@ -19,7 +19,7 @@ namespace ManagedGitLib.ExtendedTests
 
         public MonoRepoProvider()
         {
-            repoDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), $"ManagedGitLib-Tests-{Guid.NewGuid().ToString()}"));
+            repoDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), $"ManagedGitLib{Guid.NewGuid().ToString()}"));
 
             using Process gitProcess = new Process();
             gitProcess.StartInfo.WorkingDirectory = repoDirectory.FullName;
@@ -295,7 +295,7 @@ namespace ManagedGitLib.ExtendedTests
 
             Assert.Single(commitToTest.AdditionalHeaders);
 
-            Assert.Equal("HG:rename-source", commitToTest.AdditionalHeaders[0].Key);
+            Assert.Equal("HG:rename-source", commitToTest.AdditionalHeaders![0].Key);
             Assert.Equal("hg", commitToTest.AdditionalHeaders[0].Value);
         }
     }

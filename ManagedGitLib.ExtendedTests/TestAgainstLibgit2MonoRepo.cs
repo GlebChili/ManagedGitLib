@@ -20,7 +20,7 @@ namespace ManagedGitLib.ExtendedTests
 
         public Libgit2MonoRepoProvider()
         {
-            repoDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), $"ManagedGitLib-Tests-{Guid.NewGuid().ToString()}"));
+            repoDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), $"ManagedGitLib{Guid.NewGuid().ToString()}"));
 
             Repository.Clone("https://github.com/mono/mono.git", repoDirectory.FullName);
 
