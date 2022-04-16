@@ -22,7 +22,7 @@ module private TagParsers =
         pstring "tag" >>. spaces >>. many1CharsTill anyChar newline
 
     let taggerParser: Parser<TaggerHeader, unit> =
-        pstring "tagger" >>. spaces >>. CommonParsers.signatureParser >>= fun {name=name; email=email; date=date} ->
+        pstring "tagger" >>. spaces >>. CommonParsers.signatureParser .>> newline >>= fun {name=name; email=email; date=date} ->
             preturn { name=name; email=email; date=date }
 
     let tagMessageParser: Parser<string, unit> =

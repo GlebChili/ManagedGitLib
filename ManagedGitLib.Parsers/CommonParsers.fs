@@ -7,6 +7,9 @@ type AdditionalHeader = { name: string; value: string }
 type SignatureRecord = { name: string; email: string; date: int64 }
 
 module private CommonParsers =
+    let whitespaces: Parser<unit, unit> =
+        many (pchar ' ' <|> pchar '\t') >>. preturn ()
+
     let additionalHeaderValueParser: Parser<string, unit> =
         let rec innerValueParser: string -> Parser<string, unit> = fun acc ->
             manyCharsTill anyChar newline >>=
@@ -36,5 +39,7 @@ module private CommonParsers =
                 let! email = manyCharsTill anyChar (pchar '>')
                 do! spaces
                 let! date = pint64
-                let! _ = manyCharsTill anyChar newline
+                do! spaces
+                let! _ = pchar('+') <|> pchar('-')
+                do! digit >>. digit >>. digit >>. digit >>. whitespaces
                 return { name = name; email = email; date = date } }

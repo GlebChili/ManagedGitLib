@@ -16,11 +16,11 @@ type ParsedCommit = { tree: CommitTreeHeader
 
 module private CommitParsers =
     let authorParser: Parser<CommitAuthorHeader, unit> =
-        pstring "author" >>. spaces >>. CommonParsers.signatureParser >>= fun {name = name; email = email; date = date} ->
+        pstring "author" >>. spaces >>. CommonParsers.signatureParser .>> newline >>= fun {name = name; email = email; date = date} ->
             preturn  {name = name; email = email; date = date}
 
     let committerParser: Parser<CommitCommitterHeader, unit> =
-        pstring "committer" >>. spaces >>. CommonParsers.signatureParser >>= fun {name = name; email = email; date = date} ->
+        pstring "committer" >>. spaces >>. CommonParsers.signatureParser .>> newline >>= fun {name = name; email = email; date = date} ->
             preturn {name = name; email = email; date = date}
 
     let treeParser: Parser<CommitTreeHeader, unit> =
